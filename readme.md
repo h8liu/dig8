@@ -10,6 +10,8 @@ go get lonnie.io/dig8
 
 ## Source files (in reading order).
 
+### Dig8: DNS crawling library
+
 - `bug_on.go`: A helper for bug panic
 - `printer.go`: A indented printer
 - `check_label.go`: Checking label validity
