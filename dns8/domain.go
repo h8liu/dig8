@@ -46,7 +46,7 @@ func (d *Domain) String() string {
 var Root = &Domain{"", []string{}}
 
 // Parse parses a domain from a string.
-func Parse(s string) (*Domain, error) {
+func ParseDomain(s string) (*Domain, error) {
 	// a helper for generating error messages
 	err := func(s, r string) error {
 		return fmt.Errorf("'%s': %s", s, r)
@@ -87,7 +87,7 @@ func Parse(s string) (*Domain, error) {
 // D is a shortcut to generate domains.
 // It panics when the domain is invalid
 func D(s string) *Domain {
-	ret, e := Parse(s)
+	ret, e := ParseDomain(s)
 	if e != nil {
 		panic(e)
 	}
