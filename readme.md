@@ -8,7 +8,7 @@ To install:
 go get lonnie.io/dig8
 ```
 
-## Source files.
+## Source files (in reading order).
 
 - `bug_on.go`: A helper for bug panic
 - `printer.go`: A indented printer
