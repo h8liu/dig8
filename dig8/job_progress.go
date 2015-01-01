@@ -1,7 +1,7 @@
 package dig8
 
-// Respond is a crawler job feedback packet
-type Respond struct {
+// JobProgress is a crawler job feedback packet
+type JobProgress struct {
 	Name    string
 	Crawled int
 	Total   int

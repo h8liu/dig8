@@ -18,7 +18,7 @@ type job struct {
 	domains  []*dns8.Domain
 	callback string
 	crawled  int
-	respond  *Respond
+	progress *JobProgress
 
 	db     *sql.DB
 	client *rpc.Client
@@ -34,9 +34,9 @@ func newJob(name string, doms []*dns8.Domain, cb string) *job {
 	ret.domains = doms
 	ret.callback = cb
 
-	ret.respond = new(Respond)
-	ret.respond.Name = name
-	ret.respond.Total = len(doms)
+	ret.progress = new(JobProgress)
+	ret.progress.Name = name
+	ret.progress.Total = len(doms)
 
 	return ret
 }
@@ -49,7 +49,7 @@ func (j *job) connect() error {
 
 func (j *job) call() error {
 	var s string
-	return j.client.Call("Respond", j.respond, &s)
+	return j.client.Call("TouchBase", j.progress, &s)
 }
 
 func (j *job) cb() {
@@ -100,7 +100,7 @@ func (j *job) cleanup() {
 }
 
 func (j *job) fail(e error) {
-	j.respond.Error = e.Error()
+	j.progress.Error = e.Error()
 	j.cb()
 }
 
@@ -222,11 +222,11 @@ func (j *job) crawl() {
 
 func (j *job) writeOut() {
 	n := 0
-	total := j.respond.Total
+	total := j.progress.Total
 
 	chkerr := func(e error) bool {
 		if e != nil {
-			j.respond.Error = e.Error()
+			j.progress.Error = e.Error()
 			j.cb()
 			return true
 		}
@@ -261,7 +261,7 @@ func (j *job) writeOut() {
 
 		n++
 		bufed++
-		j.respond.Crawled = n
+		j.progress.Crawled = n
 
 		if bufed > 5000 {
 			err = tx.Commit()
@@ -323,6 +323,6 @@ func (j *job) writeOut() {
 		return
 	}
 
-	j.respond.Done = true
+	j.progress.Done = true
 	j.cb()
 }

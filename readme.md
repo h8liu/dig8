@@ -72,4 +72,7 @@ go get lonnie.io/dig8
 ### Dig8: DNS Crawler scheduler
 
 - `task.go`: Crawling a single domain
+- `respond.go`: Crawling respond
 - `job.go`: Crawling a list of domains
+- `job_request.go`: Job create request
+- `worker.go`: Crawling worker
