@@ -54,7 +54,7 @@ func checkName(name string) bool {
 
 // Crawl is an RPC routine that accepts a request for crawling
 // a crawler job.
-func (w *Worker) Crawl(req *Request, err *string) error {
+func (w *Worker) Crawl(req *JobRequest, err *string) error {
 	if !checkName(req.Name) {
 		*err = "bad job name"
 		return nil

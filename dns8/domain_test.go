@@ -18,7 +18,7 @@ func sameLabels(labs1, labs2 []string) bool {
 
 func TestDomainParse(t *testing.T) {
 	v := func(input, name string, labels []string) {
-		d, e := Parse(input)
+		d, e := ParseDomain(input)
 		if e != nil {
 			t.Error("err on valid domain:", input, e)
 			return
@@ -44,7 +44,7 @@ func TestDomainParse(t *testing.T) {
 	v("3721.net", "3721.net", []string{"3721", "net"})
 
 	iv := func(input string) {
-		d, e := Parse(input)
+		d, e := ParseDomain(input)
 		if d != nil || e == nil {
 			t.Error("silent on invalid domain:", input)
 		}
