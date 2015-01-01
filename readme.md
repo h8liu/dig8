@@ -12,8 +12,8 @@ go get lonnie.io/dig8
 
 - `bug_on.go`: A helper for bug panic.
 - `check_label.go`: Checking label validity
-- `pack.go`: Packing labels into a DNS packet.
-- `unpack.go`: Unpacking lables from a DNS packet.
+- `pack_labels.go`: Packing labels into a DNS packet.
+- `unpack_labels.go`: Unpacking lables from a DNS packet.
 - `regmap.go`: Registrar name maps.
 - `domain.go`: Domain name.
 - `enc.go`: Imports the big endian encoding.
