@@ -56,3 +56,9 @@ go get lonnie.io/dig8
 - `term_config.go`: Query terminal config
 - `cursor.go`: Query terminal cursor
 - `term.go`: Query terminal
+- `ipuint.go`: Convert ip to uint32
+- `name_server.go`: Name server for a zone
+- `ns_shuffle.go`: Shuffling a list of name servers
+- `zone_servers.go`: A set of name servers for a zone
+- `cache_entry.go`: Name server cache entry
+- `cache.go`: Name server cache
