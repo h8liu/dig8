@@ -41,3 +41,11 @@ go get lonnie.io/dig8
 - `sel_answer.go`: Select answer record
 - `sel_ip.go`: Select IP address for a domain
 - `packet.go`: DNS packet
+- `dns_port.go`: DNS protocol port
+- `message.go`: DNS message with a server
+- `query.go`: DNS query message to a server
+- `query_printer.go`: Query printer
+- `err_timeout.go`: The timeout error
+- `exchange.go`: A message exchange with a server
+- `job.go`: A query job for a DNS client
+- `client.go`: DNS client
