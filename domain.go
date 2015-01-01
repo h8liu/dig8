@@ -193,8 +193,8 @@ func (d *Domain) Pack(buf *bytes.Buffer) {
 	PackLabels(buf, d.labels)
 }
 
-// Unpack creates a domain from a dns packet buffer.
-func Unpack(buf *bytes.Reader, p []byte) (*Domain, error) {
+// UnpackDomain creates a domain from a dns packet buffer.
+func UnpackDomain(buf *bytes.Reader, p []byte) (*Domain, error) {
 	labels, e := UnpackLabels(buf, p)
 	if e != nil {
 		return nil, e
