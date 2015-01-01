@@ -21,7 +21,6 @@ go get lonnie.io/dig8
 - `codes.go`: DNS packet field codes
 - `flags.go`: DNS packet flag codes
 - `question.go`: DNS query question data structure
-- `id_pool.go`: A pool of DNS query ids, thread safe
 - `rdata.go`: General rdata interface
 - `rd_ipv4.go`: A records
 - `rd_ipv6.go`: AAAA records
@@ -48,4 +47,5 @@ go get lonnie.io/dig8
 - `err_timeout.go`: The timeout error
 - `exchange.go`: A message exchange with a server
 - `job.go`: A query job for a DNS client
+- `id_pool.go`: A pool of DNS query ids, thread safe
 - `client.go`: DNS client
