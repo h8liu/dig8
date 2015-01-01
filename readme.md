@@ -64,3 +64,6 @@ go get lonnie.io/dig8
 - `zone_servers.go`: A set of name servers for a zone
 - `cache_entry.go`: Name server cache entry
 - `cache.go`: Name server cache
+- `roots.go`: Root servers
+- `recur.go`: Recursive query task
+- `ips.go`: IP query task
