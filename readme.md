@@ -22,13 +22,14 @@ go get lonnie.io/dig8
 - `question.go`: DNS query question data structure.
 - `id_pool.go`: A pool of DNS query ids, thread safe.
 - `rdata.go`: General rdata interface.
-- `rdata_ipv4.go`: A records
-- `rdata_ipv6.go`: AAAA records
-- `rdata_domain.go`: NS, CNAME records
-- `rdata_mx.go`: MX records
-- `rdata_txt.go`: TXT records
-- `rdata_soa.go`: SOA records
-- `rdata_bytes.go`: Other records that we do not care
+- `rd_ipv4.go`: A records
+- `rd_ipv6.go`: AAAA records
+- `rd_domain.go`: NS, CNAME records
+- `rd_mx.go`: MX records
+- `rd_txt.go`: TXT records
+- `rd_soa.go`: SOA records
+- `rd_bytes.go`: Other records that we do not care
 - `pack_rdata.go`: Rdata packing
 - `unpack_rdata.go`: Rdata unpacking
+- `ttl_str.go`: TTL string representation
 - `rr.go`: A DNS record with domain and TTL.
