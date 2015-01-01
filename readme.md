@@ -67,3 +67,4 @@ go get lonnie.io/dig8
 - `roots.go`: Root servers
 - `recur.go`: Recursive query task
 - `ips.go`: IP query task
+- `info.go`: All record query task
