@@ -10,9 +10,9 @@ import (
 	"lonnie.io/dig8/dns8"
 )
 
-// Slave is an RPC server that takes job requests and
+// Worker is an RPC server that takes job requests and
 // performs jobs.
-type Slave struct {
+type Worker struct {
 	archive string // the archive path
 }
 
@@ -54,7 +54,7 @@ func checkName(name string) bool {
 
 // Crawl is an RPC routine that accepts a request for crawling
 // a crawler job.
-func (s *Slave) Crawl(req *Request, err *string) error {
+func (w *Worker) Crawl(req *Request, err *string) error {
 	if !checkName(req.Name) {
 		*err = "bad job name"
 		return nil
@@ -73,21 +73,21 @@ func (s *Slave) Crawl(req *Request, err *string) error {
 
 	// ready to run now
 	j := newJob(req.Name, doms, req.Callback)
-	j.archive = s.archive
+	j.archive = w.archive
 	go j.run()
 
 	*err = "" // no error
 	return nil
 }
 
-// SlaveServe runs a slave on a archive path on this machine.
-func SlaveServe(archivePath string) {
-	slave := &Slave{
+// WorkerServe runs a slave on a archive path on this machine.
+func WorkerServe(archivePath string) {
+	w := &Worker{
 		archive: archivePath,
 	}
 
 	s := rpc.NewServer()
-	e := s.RegisterName("Slave", slave)
+	e := s.RegisterName("Worker", w)
 	if e != nil {
 		log.Fatal(e)
 	}
@@ -104,7 +104,7 @@ func SlaveServe(archivePath string) {
 	for {
 		e = http.Serve(conn, s)
 		if e != nil {
-			log.Fatal("slave serve error:", e)
+			log.Fatal("worker serve error:", e)
 		}
 	}
 }

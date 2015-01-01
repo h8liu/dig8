@@ -45,7 +45,7 @@ func (d *Domain) String() string {
 // Root is the root domain.
 var Root = &Domain{"", []string{}}
 
-// Parse parses a domain from a string.
+// ParseDomain parses a domain from a string.
 func ParseDomain(s string) (*Domain, error) {
 	// a helper for generating error messages
 	err := func(s, r string) error {
