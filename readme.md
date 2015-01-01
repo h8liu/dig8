@@ -2,7 +2,7 @@
 
 A DNS crawling library.
 
-## Install by source
+To install:
 
 ```
 go get lonnie.io/dig8
