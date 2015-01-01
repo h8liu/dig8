@@ -10,7 +10,7 @@ go get lonnie.io/dig8
 
 ## Source files (in reading order).
 
-### Dig8: DNS crawling library
+### Dns8: DNS crawling library
 
 - `bug_on.go`: A helper for bug panic
 - `printer.go`: A indented printer
@@ -68,3 +68,8 @@ go get lonnie.io/dig8
 - `recur.go`: Recursive query task
 - `ips.go`: IP query task
 - `info.go`: All record query task
+
+### Dig8: DNS Crawler scheduler
+
+- `task.go`: Crawling a single domain
+- `job.go`: Crawling a list of domains
