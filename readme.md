@@ -49,3 +49,10 @@ go get lonnie.io/dig8
 - `job.go`: A query job for a DNS client
 - `id_pool.go`: A pool of DNS query ids, thread safe
 - `client.go`: DNS client
+- `node.go`: A query tree node
+- `leaf.go`: A query tree leaf
+- `branch.go`: Query tree branch, tasks and cursors
+- `stack.go`: Stack for building a query tree
+- `term_config.go`: Query terminal config
+- `cursor.go`: Query terminal cursor
+- `term.go`: Query terminal
