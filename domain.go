@@ -105,7 +105,7 @@ func (d *Domain) IsZoneOf(o *Domain) bool {
 // IsParentOf checks if domain d is parent of domain o.
 func (d *Domain) IsParentOf(o *Domain) bool { return o.IsChildOf(d) }
 
-// Is ChildOf checks if domain d is child domain of domain o.
+// IsChildOf checks if domain d is child domain of domain o.
 func (d *Domain) IsChildOf(c *Domain) bool {
 	n := len(d.labels)
 	nc := len(c.labels)
