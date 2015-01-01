@@ -31,3 +31,4 @@ go get lonnie.io/dig8
 - `rdata_bytes.go`: Other records that we do not care
 - `pack_rdata.go`: Rdata packing
 - `unpack_rdata.go`: Rdata unpacking
+- `rr.go`: A DNS record with domain and TTL.
