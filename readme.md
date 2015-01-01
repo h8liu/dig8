@@ -8,7 +8,7 @@ A DNS crawling library.
 go get lonnie.io/dig8
 ```
 
-## Table of Source files.
+## Source files.
 
 - `check_label.go`: Checking label validity
 - `pack.go`: Packing labels into a DNS packet.
