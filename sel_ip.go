@@ -7,3 +7,5 @@ type SelectIP struct{ Domain *Domain }
 func (s *SelectIP) Select(rr *RR, _ int) bool {
 	return rr.Type == A && rr.Domain.Equal(s.Domain)
 }
+
+var _ Selector = new(SelectIP)

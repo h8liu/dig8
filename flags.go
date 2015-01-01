@@ -38,8 +38,6 @@ const (
 func flagString(flag uint16) string {
 	var tags []string
 
-	rcode := func(flag uint16) uint16 { return flag & RcodeMask }
-
 	tag := func(b bool, s string) {
 		if b {
 			tags = append(tags, s)
@@ -54,7 +52,7 @@ func flagString(flag uint16) string {
 	tag((flag&FlagRD) != 0, "rec-desir")
 	tag((flag&FlagRA) != 0, "rec-avail")
 
-	c := rcode(flag)
+	c := flag & RcodeMask
 	tag(c == RcodeFormatError, "fmt-err")
 	tag(c == RcodeServerFail, "serv-fail")
 	tag(c == RcodeNameError, "name-err")

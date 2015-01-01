@@ -2,7 +2,7 @@ package dig8
 
 // Section flags
 const (
-	SecAnsw = 1 << iota
+	SecAnsw = 1 << iota // TODO: why use bits
 	SecAuth
 	SecAddi
 )

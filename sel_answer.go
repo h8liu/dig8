@@ -13,3 +13,5 @@ func (s *SelectAnswer) Select(rr *RR, _ int) bool {
 	}
 	return s.Type == rr.Type || (s.Type == A && rr.Type == CNAME)
 }
+
+var _ Selector = new(SelectAnswer)

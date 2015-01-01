@@ -40,3 +40,4 @@ go get lonnie.io/dig8
 - `sel_redirect.go`: Select redirection related record
 - `sel_answer.go`: Select answer record
 - `sel_ip.go`: Select IP address for a domain
+- `packet.go`: DNS packet

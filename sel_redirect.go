@@ -12,3 +12,5 @@ func (s *SelectRedirect) Select(rr *RR, _ int) bool {
 	return rr.Type == NS && rr.Domain.IsChildOf(s.Zone) &&
 		rr.Domain.IsZoneOf(s.Domain)
 }
+
+var _ Selector = new(SelectRedirect)

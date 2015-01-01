@@ -10,3 +10,5 @@ type SelectRecord struct {
 func (s *SelectRecord) Select(rr *RR, _ int) bool {
 	return rr.Domain.Equal(s.Domain) && s.Type == rr.Type
 }
+
+var _ Selector = new(SelectRecord)
