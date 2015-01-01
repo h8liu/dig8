@@ -1,8 +1,6 @@
 package dig8
 
 import (
-	"github.com/h8liu/d8/domain"
-
 	"bytes"
 	"errors"
 	"fmt"
@@ -66,6 +64,6 @@ func (d *RdMx) Pack() []byte {
 	b := make([]byte, 2)
 	enc.PutUint16(b, d.Priority)
 	buf.Write(b)
-	domain.PackLabels(buf, d.Domain)
+	PackLabels(buf, d.Domain)
 	return buf.Bytes()
 }
