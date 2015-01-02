@@ -1,0 +1,71 @@
+<!doctype html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <link href="./style.css" rel="stylesheet" type="text/css" media="all">
+    <title>CESR DNS Crawler</title>
+</head>
+
+<body>
+
+<div class="jobs">
+    <h1>CESR DNS Crawler</h1>
+    <form method="get" action="#" class="search">
+        <input type="text" value="" class="jobname" name="q" id="search"> <img alt="Search" src="./search.png" width="20" height="20" class="search">
+    </form>
+    <h2>Jobs</h2>
+
+    <ul class="jobs">
+        <li>
+            <span class="jobname" ><a href="#">test.taxdfe</a></span>
+            - 543/1000 (54%)
+            <span class="jobruntime">3h</span>
+        </li>
+    </ul>
+    <h2>Create New Job</h2>
+    <form method="get" action="#" class="addjob">
+        <div class="hidden">Domains: <br/>
+            <textarea id="doms" name="doms" class="doms"></textarea>
+        </div>
+        <div class="hidden">
+            <input type="submit" value="Create" class="create">
+        </div>
+    </form>
+
+    <div class="credits">Designed by Lonnie.</div>
+</div>
+
+<div class="job">
+    <div class="jobtitle"><span class="jobname">test.taxdfe<span></div>
+
+    <ul class="jobmeta">
+        <li>2015 Jan 2, 2:45 PM created</li>
+        <li>543/1000 (54%) crawled</li>
+    </ul>
+
+    <ul class="domlist">
+        <li><a href="#">lonnie.io</a>
+            <img alt="check" src="./check.png" width="16" height="12" class="check">
+        </li>
+        <li><a href="#">liulonnie.net</a></li>
+        <li><a href="#">h8liu.ucsd.edu</a>
+            <img alt="check" src="./check.png" width="16" height="12" class="check">
+        </li>
+        <li><a href="#">www.google.com</a></li>
+        <li><a href="#">gmail.com</a></li>
+    </ul>
+
+</div>
+
+<div class="output">
+    <div class="domtitle">lonnie.io</div>
+    <div class="sectitle">Result</div>
+    <pre class="out">some output</pre>
+    <div class="sectitle">Log</div>
+    <pre class="log">some log</pre>
+</div>
+
+
+<script language="javascript" type="text/javascript" src="lib/jquery.js"></script>
+</body>
+</html>

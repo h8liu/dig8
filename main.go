@@ -22,6 +22,8 @@ func main() {
 		send()
 	case "dig":
 		dig()
+	case "serve":
+		serve()
 	default:
 		fmt.Fprintf(os.Stderr, "error: invalid command %q\n", mode)
 		fmt.Fprintf(os.Stderr, "try worker, send or dig\n")

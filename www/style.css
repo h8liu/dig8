@@ -1,0 +1,187 @@
+@import url(http://fonts.googleapis.com/css?family=Open+Sans:400italic,400);
+
+body {
+    background: #fff;
+    margin: auto;
+    padding: .1in;
+    font-family: "Open Sans", "Helvetica", "Arial", "sans-serif";
+    font-size: .14in;
+}
+
+pre {
+    margin: 0;
+    padding: 0;
+    font-family: "Consolas", "monospace";
+    font-size: 13px;
+}
+
+ul {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    margin-top: .1in;
+    margin-bottom: .1in;
+}
+
+ul li {
+    margin: 0;
+    padding: 0;
+}
+
+a {
+    text-decoration: none;
+    color: #00c;
+}
+
+a:hover {
+    text-decoration: underline;
+}
+
+div.jobs {
+    float: left;
+    width: 270px;
+    padding-left: .3in;
+}
+
+h1 {
+    margin-top: .1in;
+    margin-bottom: .1in;
+    font-size: .19in;
+    font-weight: normal;
+    margin-left: -10px;
+}
+
+div.jobs h2 {
+    margin-top: .25in;
+    font-size: .15in;
+    font-weight: normal;
+    margin-bottom: .1in;
+    margin-left: -10px;
+}
+
+span.jobruntime {
+    color: #666;
+}
+
+form {
+    margin: 0;
+    padding: 0;
+}
+
+form div {
+    margin-top: .1in;
+    margin-bottom: .1in;
+}
+
+form input[type="submit"],
+form input[type="button"] {
+    font-family: "Open Sans", "Helvetica", "Arial", "sans-serif";
+    font-size: .14in;
+}
+
+form input[type="text"] {
+    font-family: "Consolas", "monospace";
+    font-size: 13px;
+}
+
+form.search {
+    float: right;
+    width: 170px;
+    margin-top: .15in;
+    padding-right: 50px;
+    text-align: right;
+}
+
+img.search {
+    margin-left: 3px;
+    width: 20px;
+    height: 20px;
+    vertical-align: bottom;
+}
+
+
+form input.jobname {
+    margin-left: .05in;
+    width: 100px;
+    border-radius: 3px;
+    border: 1px solid #ccc;
+    padding: 2px;
+}
+
+form input.create {
+    padding-left: 5px;
+    padding-right: 5px;
+    padding-top: 3px;
+    padding-bottom: 3px;
+}
+
+form textarea.doms {
+    margin-top: .05in;
+    font-family: "Consolas", "monospace";
+    font-size: 13px;
+    width: 210px;
+    min-height: 300px;
+    padding: .05in;
+    border-radius: 5px;
+}
+
+span.jobname {
+    font-family: "Consolas", "monospace";
+}
+
+div.job {
+    float: left;
+    width: 230px;
+}
+
+div.jobtitle {
+    margin-top: .1in;
+    font-size: 20px;
+}
+
+ul.jobmeta {
+    color: #666;
+}
+
+ul.domlist {
+    margin-top: .2in;
+    font-family: "Consolas", "monospace";
+    font-size: 13px;
+}
+
+ul.domlist li {
+    margin-top: 3px;
+    margin-bottom: 3px;
+}
+
+div.credits {
+    margin-top: .7in;
+    color: #999;
+}
+
+div.output {
+    margin-left: 540px;
+    padding-top: .15in;
+}
+
+div.domtitle {
+    font-family: "Consolas", "monospace";
+    font-size: 20px;
+}
+
+div.sectitle {
+    margin-top: .2in;
+    font-size: .15in;
+    color: #666;
+}
+
+div.output pre {
+    margin-top: 5px;
+    margin-bottom: .1in;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    background: #f3f3f3;
+    padding: .1in;
+    width: 95%;
+    overflow: auto;
+}
