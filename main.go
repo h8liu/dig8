@@ -2,35 +2,48 @@ package main
 
 import (
 	"flag"
+	"fmt"
 	"io/ioutil"
 	"log"
 	"net/rpc"
+	"os"
+	"path/filepath"
 	"runtime"
 	"strings"
 
 	"lonnie.io/dig8/dig8"
+	"lonnie.io/dig8/dns8"
 )
 
-var (
-	jobName    = flag.String("o", "", "job output name")
-	inputPath  = flag.String("i", "doms", "input domain list")
-	serverAddr = flag.String("s", "localhost:5353", "server address")
-	saveAddr   = flag.String("a", "", "archive prefix")
-)
-
-func main() {
-	runtime.GOMAXPROCS(4)
-	flag.Parse()
-
-	if *jobName == "" {
-		dig8.WorkerServe(*saveAddr)
-		return
-	}
-
-	bs, e := ioutil.ReadFile(*inputPath)
+func ne(e error) {
 	if e != nil {
 		log.Fatal(e)
 	}
+}
+
+func worker() {
+	archive := flag.String("a", "", "archive prefix")
+	flag.Parse()
+
+	dig8.WorkerServe(*archive)
+}
+
+func send() {
+	jobName := flag.String("j", "", "job output name")
+	serverAddr := flag.String("s", "localhost:5353", "server address")
+	flag.Parse()
+
+	args := flag.Args()
+	if len(args) == 0 {
+		log.Fatal("error: no input domain list")
+	} else if len(args) != 1 {
+		log.Fatal("error: multiple input domain lists")
+	}
+
+	inputPath := args[0]
+
+	bs, e := ioutil.ReadFile(inputPath)
+	ne(e)
 
 	req := new(dig8.JobRequest)
 
@@ -44,22 +57,72 @@ func main() {
 	}
 
 	req.Name = *jobName
-
-	c, e := rpc.DialHTTP("tcp", *serverAddr)
-	if e != nil {
-		log.Fatal(e)
+	if req.Name == "" {
+		req.Name = filepath.Base(inputPath)
 	}
 
+	c, e := rpc.DialHTTP("tcp", *serverAddr)
+	ne(e)
+
 	var reply string
-	e = c.Call("Worker.Crawl", req, &reply)
-	if e != nil {
-		log.Fatal(e)
-	} else if reply != "" {
+	ne(c.Call("Worker.Crawl", req, &reply))
+	if reply != "" {
 		log.Print(reply)
 	}
 
-	e = c.Close()
-	if e != nil {
-		log.Fatal(e)
+	ne(c.Close())
+}
+
+func dig() {
+	verbose := flag.Bool("v", false, "verbose")
+	flag.Parse()
+
+	c, e := dns8.NewClient()
+	ne(e)
+
+	t := dns8.NewTerm(c)
+	if *verbose {
+		t.Log = os.Stdout
+	} else {
+		t.Log = nil
+	}
+	t.Out = os.Stdout
+
+	args := flag.Args()
+	for _, s := range args {
+		d, e := dns8.ParseDomain(s)
+		if e != nil {
+			fmt.Fprintln(os.Stderr, e)
+			continue
+		}
+		fmt.Printf("// %v\n", d)
+
+		_, e = t.T(dns8.NewInfo(d))
+		if e != nil {
+			fmt.Fprintln(os.Stderr, e)
+		}
+	}
+}
+
+func main() {
+	runtime.GOMAXPROCS(4)
+
+	var mode string
+	if len(os.Args) > 1 {
+		mode = os.Args[1]
+		os.Args = os.Args[1:]
+	}
+
+	switch mode {
+	case "worker":
+		worker()
+	case "send":
+		send()
+	case "dig":
+		dig()
+	default:
+		fmt.Fprintf(os.Stderr, "error: invalid command %q\n", mode)
+		fmt.Fprintf(os.Stderr, "try worker, send or dig\n")
+		os.Exit(-1)
 	}
 }
