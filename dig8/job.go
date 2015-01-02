@@ -2,6 +2,7 @@ package dig8
 
 import (
 	"database/sql"
+	"fmt"
 	"log"
 	"net/rpc"
 	"os"
@@ -107,17 +108,24 @@ func (j *job) fail(e error) {
 func (j *job) failOn(e error) bool {
 	if e != nil {
 		j.fail(e)
+		log.Printf("[%s] error: %s", j.name, e.Error())
 		return true
 	}
 	return false
 }
 
 func (j *job) run() {
-	log.Printf("job %s started", j.name)
-	defer log.Printf("job %s done", j.name)
+	log.Printf("[%s] job started", j.name)
+	defer log.Printf("[%s] job done", j.name)
 	defer j.cleanup()
 
-	db, err := sql.Open("sqlite3", j.name+".db")
+	dbPath := j.name + ".db"
+	if _, err := os.Stat(dbPath); err == nil {
+		j.failOn(fmt.Errorf("job %s already exists", j.name))
+		return
+	}
+
+	db, err := sql.Open("sqlite3", dbPath)
 	if j.failOn(err) {
 		return
 	}
@@ -176,7 +184,7 @@ func (j *job) run() {
 		return
 	}
 
-	log.Printf("job %s starts crawling", j.name)
+	log.Printf("[%s] starts crawling", j.name)
 	j.crawl()
 }
 
@@ -205,7 +213,7 @@ func (j *job) crawl() {
 	go func() {
 		for i, d := range j.domains {
 			quota := <-j.quotas
-			task := &task{
+			t := &task{
 				domain:   d,
 				client:   c,
 				quota:    quota,
@@ -213,7 +221,7 @@ func (j *job) crawl() {
 				quotaRet: j.quotas,
 				taskDone: j.resChan,
 			}
-			go task.run()
+			go t.run()
 		}
 	}()
 

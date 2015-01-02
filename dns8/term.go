@@ -17,6 +17,8 @@ type Term struct {
 func NewTerm(c *Client) *Term {
 	ret := new(Term)
 	ret.client = c
+
+	ret.TermConfig = new(TermConfig)
 	ret.PrintFlag = PrintReply
 	ret.Retry = 3
 
