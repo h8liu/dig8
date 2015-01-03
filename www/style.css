@@ -73,13 +73,12 @@ form div {
     margin-bottom: .1in;
 }
 
-form input[type="submit"],
-form input[type="button"] {
+form input.but {
     font-family: "Open Sans", "Helvetica", "Arial", "sans-serif";
-    font-size: .14in;
+    font-size: .15in;
 }
 
-form input[type="text"] {
+form input {
     font-family: "Consolas", "monospace";
     font-size: 13px;
 }
@@ -123,6 +122,7 @@ form textarea.doms {
     min-height: 300px;
     padding: .05in;
     border-radius: 5px;
+    border: 1px solid #ccc;
 }
 
 span.jobname {
@@ -137,6 +137,7 @@ div.job {
 div.jobtitle {
     margin-top: .1in;
     font-size: 20px;
+    color: #903;
 }
 
 ul.jobmeta {
@@ -167,6 +168,7 @@ div.output {
 div.domtitle {
     font-family: "Consolas", "monospace";
     font-size: 20px;
+    color: #039;
 }
 
 div.sectitle {
@@ -185,3 +187,6 @@ div.output pre {
     width: 95%;
     overflow: auto;
 }
+
+a.dom, ul.domlist a { color: #039; }
+a.job { color: #903; }
