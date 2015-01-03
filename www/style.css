@@ -75,7 +75,8 @@ form div {
 
 form input.but {
     font-family: "Open Sans", "Helvetica", "Arial", "sans-serif";
-    font-size: .15in;
+    font-size: .14in;
+    -webkit-appearance: button;
 }
 
 form input {
@@ -97,7 +98,6 @@ img.search {
     height: 20px;
     vertical-align: bottom;
 }
-
 
 form input.jobname {
     margin-left: .05in;
