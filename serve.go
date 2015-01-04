@@ -41,13 +41,14 @@ func serve() {
 
 	go func() {
 		rs := rpc.NewServer()
-		e := rs.RegisterName("Server", s)
+		e := rs.RegisterName("Server", s.RPC())
 		ne(e)
 
 		conn, e := net.Listen("tcp", *rpcAddr)
 		ne(e)
+
 		for {
-			le(http.Serve(conn, s))
+			le(http.Serve(conn, rs))
 		}
 	}()
 

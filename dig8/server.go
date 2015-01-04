@@ -112,6 +112,32 @@ func jsonEncode(i interface{}) string {
 	return string(bs)
 }
 
+// RpcServer for rpc
+type RPCServer struct {
+	s *Server
+}
+
+// CallbackServer for callback
+type CallbackServer struct {
+	s *Server
+}
+
+// Progress wraps the Progress function of the server
+func (s *CallbackServer) Progress(p *JobProgress, err *string) error {
+	return s.s.Progress(p, err)
+}
+
+// NewJob wraps the NewJob function of the server
+func (s *RPCServer) NewJob(j *NewJob, err *string) error {
+	return s.s.NewJob(j, err)
+}
+
+// RPC returns an RPCServer
+func (s *Server) RPC() *RPCServer { return &RPCServer{s} }
+
+// Callback returns a callback server
+func (s *Server) Callback() *CallbackServer { return &CallbackServer{s} }
+
 // Progress updates the progress.
 func (s *Server) Progress(p *JobProgress, err *string) error {
 	log.Print(jsonEncode(p))
@@ -143,6 +169,7 @@ const encodeHex = "0123456789abcdefghijklmnopqrstuv"
 var base32enc = base32.NewEncoding(encodeHex)
 
 func (s *Server) errorJob(name string, e error) {
+	log.Println("job %q error: %s", name, e)
 	s.q(`update jobs set state=? err=? where name=?`,
 		int(Errored), e.Error(), name,
 	)
@@ -247,6 +274,7 @@ func (s *Server) NewJob(j *NewJob, err *string) error {
 	s.createJob(j.Domains, name)
 	s.startJob(name)
 
+	log.Println("job %q created", name)
 	return nil
 }
 
