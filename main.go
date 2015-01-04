@@ -20,6 +20,8 @@ func main() {
 		worker()
 	case "send":
 		send()
+	case "create":
+		create()
 	case "dig":
 		dig()
 	case "serve":
