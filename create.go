@@ -53,8 +53,12 @@ func create() {
 	}
 
 	job.Tag = *tagName
-	for _, d := range lines {
-		dom, e := dns8.ParseDomain(d)
+	for _, line := range lines {
+		line = strings.TrimSpace(line)
+		if line == "" {
+			continue
+		}
+		dom, e := dns8.ParseDomain(line)
 		if e != nil {
 			log.Fatalf("error: %s", e)
 		}
