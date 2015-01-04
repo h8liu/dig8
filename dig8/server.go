@@ -15,7 +15,7 @@ import (
 
 	"lonnie.io/dig8/dns8"
 
-	_ "github.com/mattn/go-sqlite3"
+	_ "github.com/mattn/go-sqlite3" // sqlite3 support
 )
 
 func qne(sql string, e error) {
@@ -25,6 +25,7 @@ func qne(sql string, e error) {
 	}
 }
 
+// InitDB creates the database schemes
 func InitDB(dbPath string) {
 	db, err := sql.Open("sqlite3", dbPath)
 	ne(err)
