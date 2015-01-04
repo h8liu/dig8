@@ -9,3 +9,9 @@ func ne(e error) {
 		log.Fatal(e)
 	}
 }
+
+func le(e error) {
+	if e != nil {
+		log.Print(e)
+	}
+}

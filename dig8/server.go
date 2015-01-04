@@ -5,6 +5,7 @@ import (
 	"crypto/sha1"
 	"database/sql"
 	"encoding/base32"
+	"encoding/json"
 	"io"
 	"io/ioutil"
 	"log"
@@ -105,8 +106,16 @@ func (s *Server) archive(name string) {
 	}(name)
 }
 
+func jsonEncode(i interface{}) string {
+	bs, e := json.MarshalIndent(i, "", "    ")
+	ne(e)
+	return string(bs)
+}
+
 // Progress updates the progress.
 func (s *Server) Progress(p *JobProgress, err *string) error {
+	log.Print(jsonEncode(p))
+
 	state := Crawling
 	if p.Error != "" {
 		state = Errored
