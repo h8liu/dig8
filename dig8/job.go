@@ -2,6 +2,7 @@ package dig8
 
 import (
 	"database/sql"
+	"errors"
 	"fmt"
 	"log"
 	"net/rpc"
@@ -50,7 +51,14 @@ func (j *job) connect() error {
 
 func (j *job) call() error {
 	var s string
-	return j.client.Call("TouchBase", j.progress, &s)
+	e := j.client.Call("Jobs.Progress", j.progress, &s)
+	if e != nil {
+		return e
+	}
+	if s != "" {
+		return errors.New(s)
+	}
+	return nil
 }
 
 func (j *job) cb() {

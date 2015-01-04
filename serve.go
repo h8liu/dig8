@@ -1,60 +1,21 @@
 package main
 
 import (
-	"database/sql"
 	"flag"
 	"go/build"
-	"log"
 	"net/http"
 	"path/filepath"
-	"strings"
 
-	_ "github.com/mattn/go-sqlite3"
+	"lonnie.io/dig8/dig8"
 )
 
 var (
-	dbPath    = flag.String("db", "jobs.db", "database path")
-	doDbInit  = flag.Bool("init", false, "init database")
-	serveAddr = flag.String("http", ":8053", "serving address")
+	dbPath   = flag.String("db", "jobs.db", "database path")
+	doDbInit = flag.Bool("init", false, "init database")
+	httpAddr = flag.String("http", ":5380", "serving address")
+	rpcAddr  = flag.String("http", "localhost:5300", "rpc management address")
+	cbAddr   = flag.String("http", "localhost:5301", "callback address")
 )
-
-func dbInit() {
-	db, err := sql.Open("sqlite3", *dbPath)
-	ne(err)
-
-	q := func(sql string) {
-		_, e := db.Exec(sql)
-		if e != nil {
-			log.Printf("sql: %s\n", sql)
-			ne(e)
-		}
-	}
-
-	q(`create table jobs (
-		name text not null primary key,
-		state int,
-		total int,
-		crawled int,
-		worker text,
-		sample text,
-		err text,
-		birth text,
-		death text
-	);`)
-
-	ne(db.Close())
-}
-
-func handleApi(w http.ResponseWriter, r *http.Request) {
-	name := strings.TrimPrefix(r.URL.Path, "/api/")
-
-	switch name {
-	case "list":
-		panic("todo")
-	default:
-		w.WriteHeader(404)
-	}
-}
 
 func wwwPath() string {
 	pkg, e := build.Import("lonnie.io/dig8", "", build.FindOnly)
@@ -62,17 +23,23 @@ func wwwPath() string {
 	return filepath.Join(pkg.Dir, "www")
 }
 
+// httpAddr (port 5380 default): http interface
+// rpcAddr (port 5300 default): rpc interface
+// cbAddr (port 5301 default): callback interface
 func serve() {
 	flag.Parse()
 
 	if *doDbInit {
-		dbInit()
+		dig8.InitDB(*dbPath)
 		return
 	}
 
+	s, e := dig8.NewServer(*dbPath)
+	ne(e)
+
 	http.Handle("/", http.FileServer(http.Dir(wwwPath())))
-	http.HandleFunc("/jobs/", handleApi)
+	http.Handle("/jobs/", s)
 	for {
-		ne(http.ListenAndServe(*serveAddr, nil))
+		ne(http.ListenAndServe(*httpAddr, nil))
 	}
 }
