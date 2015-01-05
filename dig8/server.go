@@ -10,6 +10,7 @@ import (
 	"io"
 	"io/ioutil"
 	"log"
+	"net"
 	"net/http"
 	"net/rpc"
 	"os"
@@ -75,6 +76,39 @@ func NewServer(dbPath string, cbAddr string) (*Server, error) {
 	return ret, nil
 }
 
+// ServeRPC launches the RPC server
+func (s *Server) ServeRPC(rpcAddr string) {
+	rs := rpc.NewServer()
+	e := rs.RegisterName("Server", s.RPC())
+	ne(e)
+
+	c, e := net.Listen("tcp", rpcAddr)
+	ne(e)
+
+	for {
+		e = http.Serve(c, rs)
+		if e != nil {
+			log.Print(e)
+		}
+	}
+}
+
+// ServeCallback launches the callback RPC server
+func (s *Server) ServeCallback() {
+	cb := rpc.NewServer()
+	e := cb.RegisterName("Jobs", s.Callback())
+	ne(e)
+	c, e := net.Listen("tcp", s.cbAddr)
+	ne(e)
+
+	for {
+		e = http.Serve(c, cb)
+		if e != nil {
+			log.Print(e)
+		}
+	}
+}
+
 // db.Exec wrapper
 func (s *Server) q(sql string, args ...interface{}) sql.Result {
 	res, e := s.db.Exec(sql, args...)
@@ -119,15 +153,11 @@ func jsonEncode(i interface{}) string {
 	return string(bs)
 }
 
-// RpcServer for rpc
-type RPCServer struct {
-	s *Server
-}
+// RPCServer for rpc
+type RPCServer struct{ s *Server }
 
 // CallbackServer for callback
-type CallbackServer struct {
-	s *Server
-}
+type CallbackServer struct{ s *Server }
 
 // Progress wraps the Progress function of the server
 func (s *CallbackServer) Progress(p *JobProgress, err *string) error {
@@ -229,7 +259,7 @@ func (s *Server) startJob(name string) {
 	// total := len(doms)
 
 	worker := s.pickWorker()
-	s.q(`update job set worker=?, state=? where name=?`,
+	s.q(`update jobs set worker=?, state=? where name=?`,
 		worker, int(Crawling), name,
 	)
 
@@ -306,7 +336,7 @@ func (s *Server) NewJob(j *NewJob, err *string) error {
 	}
 
 	s.createJob(j.Domains, name)
-	log.Println("job %q created", name)
+	log.Printf("job %q created", name)
 
 	go s.startJob(name)
 

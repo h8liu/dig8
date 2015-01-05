@@ -3,9 +3,7 @@ package main
 import (
 	"flag"
 	"go/build"
-	"net"
 	"net/http"
-	"net/rpc"
 	"path/filepath"
 
 	"lonnie.io/dig8/dig8"
@@ -39,18 +37,8 @@ func serve() {
 	s, e := dig8.NewServer(*dbPath, *cbAddr)
 	ne(e)
 
-	go func() {
-		rs := rpc.NewServer()
-		e := rs.RegisterName("Server", s.RPC())
-		ne(e)
-
-		conn, e := net.Listen("tcp", *rpcAddr)
-		ne(e)
-
-		for {
-			le(http.Serve(conn, rs))
-		}
-	}()
+	go s.ServeRPC(*rpcAddr)
+	go s.ServeCallback()
 
 	http.Handle("/", http.FileServer(http.Dir(wwwPath())))
 	http.Handle("/jobs/", s)
