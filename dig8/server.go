@@ -81,6 +81,8 @@ func NewServer(dbPath string, cbAddr string) (*Server, error) {
 	ret.cbAddr = cbAddr
 	ret.workers = make(map[string]int)
 
+	go ret.startOldJobs()
+
 	return ret, nil
 }
 
@@ -292,6 +294,26 @@ func (s *Server) pickWorker() string {
 	ret := workers[mrand.Intn(len(workers))]
 	s.workers[ret] = workerPending
 	return ret
+}
+
+func (s *Server) startOldJobs() {
+	rows := s.qs(`select name from jobs where state = 1 or state = 2`)
+
+	var jobs []string
+
+	for rows.Next() {
+		var jobName string
+		e := rows.Scan(&jobName)
+		ne(e)
+		jobs = append(jobs, jobName)
+	}
+
+	ne(rows.Err())
+	ne(rows.Close())
+
+	for _, j := range jobs {
+		go s.startJob(j)
+	}
 }
 
 func (s *Server) startJob(name string) {
