@@ -45,10 +45,10 @@ func InitDB(dbPath string) {
 		crawled int not null,
 		sample text not null,
 		salt text not null,
-		worker text not null,
-		err text not null,
-		birth text not null,
-		death text not null
+		worker text not null default "",
+		err text not null default "",
+		birth text not null default "",
+		death text not null default ""
 	);`)
 
 	ne(db.Close())
@@ -147,7 +147,7 @@ func (s *Server) Callback() *CallbackServer { return &CallbackServer{s} }
 
 // Progress updates the progress.
 func (s *Server) Progress(p *JobProgress, err *string) error {
-	log.Print(jsonEncode(p))
+	log.Println("Progres: ", jsonEncode(p))
 
 	state := Crawling
 	if p.Error != "" {
@@ -258,6 +258,8 @@ func (s *Server) startJob(name string) {
 
 // NewJob creates a new job
 func (s *Server) NewJob(j *NewJob, err *string) error {
+	log.Println("NewJob: ", jsonEncode(j))
+
 	nsample := len(j.Domains)
 	if nsample > 20 {
 		nsample = 20
@@ -269,7 +271,8 @@ func (s *Server) NewJob(j *NewJob, err *string) error {
 	var salt [32]byte
 	var name string
 
-	for {
+	var succ bool
+	for i := 0; i < 100; i++ {
 		// generate salt
 		_, e := rand.Read(salt[:])
 		ne(e)
@@ -279,7 +282,7 @@ func (s *Server) NewJob(j *NewJob, err *string) error {
 		hash := sha1.New()
 		hash.Write(salt[:])
 		io.WriteString(hash, sample)
-		name = j.Tag + "." + base32enc.EncodeToString(hash.Sum(nil))[:8]
+		name = j.Tag + "." + base32enc.EncodeToString(hash.Sum(nil))[:6]
 
 		res := s.q(`insert or ignore into jobs 
 			(name, state, total, crawled, sample, salt, birth)
@@ -292,8 +295,14 @@ func (s *Server) NewJob(j *NewJob, err *string) error {
 		rows, e := res.RowsAffected()
 		ne(e)
 		if rows > 0 {
+			succ = true
 			break
 		}
+	}
+
+	if !succ {
+		*err = "creating job failed, tried 100 times"
+		return nil
 	}
 
 	s.createJob(j.Domains, name)
@@ -301,6 +310,7 @@ func (s *Server) NewJob(j *NewJob, err *string) error {
 
 	go s.startJob(name)
 
+	*err = ""
 	return nil
 }
 
