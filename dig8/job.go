@@ -27,8 +27,8 @@ type job struct {
 	client *rpc.Client
 	quotas chan int
 
-	resChan   chan *task
-	writeDone chan bool
+	resChan chan *task
+	jobDone chan bool
 }
 
 func newJob(name string, doms []*dns8.Domain, cb string) *job {
@@ -41,6 +41,8 @@ func newJob(name string, doms []*dns8.Domain, cb string) *job {
 	ret.progress.Name = name
 	ret.progress.Total = len(doms)
 
+	ret.jobDone = make(chan bool, 1)
+
 	return ret
 }
 
@@ -52,7 +54,7 @@ func (j *job) connect() error {
 
 func (j *job) call() error {
 	var s string
-	e := j.client.Call("Jobs.Progress", j.progress, &s)
+	e := j.client.Call("Cb.Progress", j.progress, &s)
 	if e != nil {
 		return e
 	}
@@ -350,4 +352,6 @@ func (j *job) writeOut() {
 
 	j.progress.Done = true
 	j.cb()
+
+	j.jobDone <- true
 }

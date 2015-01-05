@@ -10,11 +10,13 @@ import (
 	"io"
 	"io/ioutil"
 	"log"
+	mrand "math/rand"
 	"net"
 	"net/http"
 	"net/rpc"
 	"os"
 	"strings"
+	"sync"
 	"time"
 
 	"lonnie.io/dig8/dns8"
@@ -60,6 +62,9 @@ func InitDB(dbPath string) {
 type Server struct {
 	db     *sql.DB
 	cbAddr string
+
+	workersLock sync.Mutex
+	workers     map[string]int
 }
 
 // NewServer creates a new server working on a database.
@@ -73,12 +78,14 @@ func NewServer(dbPath string, cbAddr string) (*Server, error) {
 
 	ret.db = db
 	ret.cbAddr = cbAddr
+	ret.workers = make(map[string]int)
 
 	return ret, nil
 }
 
 // ServeRPC launches the RPC server
 func (s *Server) ServeRPC(rpcAddr string) {
+	log.Printf("servering rpc on %s", rpcAddr)
 	rs := rpc.NewServer()
 	e := rs.RegisterName("Server", s.RPC())
 	ne(e)
@@ -96,8 +103,9 @@ func (s *Server) ServeRPC(rpcAddr string) {
 
 // ServeCallback launches the callback RPC server
 func (s *Server) ServeCallback() {
+	log.Printf("servering callback on %s", s.cbAddr)
 	cb := rpc.NewServer()
-	e := cb.RegisterName("Jobs", s.Callback())
+	e := cb.RegisterName("Cb", s.Callback())
 	ne(e)
 	c, e := net.Listen("tcp", s.cbAddr)
 	ne(e)
@@ -165,6 +173,11 @@ func (s *CallbackServer) Progress(p *JobProgress, err *string) error {
 	return s.s.Progress(p, err)
 }
 
+// Heartbeat wraps the worker Heartbeat function of the server
+func (s *CallbackServer) Heartbeat(ws *WorkerState, err *string) error {
+	return s.s.Heartbeat(ws, err)
+}
+
 // NewJob wraps the NewJob function of the server
 func (s *RPCServer) NewJob(j *NewJob, err *string) error {
 	return s.s.NewJob(j, err)
@@ -193,6 +206,16 @@ func (s *Server) Progress(p *JobProgress, err *string) error {
 	)
 	*err = ""
 
+	return nil
+}
+
+// Heartbeat reports the worker state
+func (s *Server) Heartbeat(ws *WorkerState, err *string) error {
+	s.workersLock.Lock()
+	s.workers[ws.Worker] = ws.State
+	s.workersLock.Unlock()
+
+	*err = ""
 	return nil
 }
 
@@ -246,7 +269,24 @@ func (s *Server) createJob(doms []string, name string) {
 }
 
 func (s *Server) pickWorker() string {
-	return "localhost:5353"
+	var workers []string
+
+	s.workersLock.Lock()
+	defer s.workersLock.Unlock()
+
+	for w, state := range s.workers {
+		if state == workerIdle {
+			workers = append(workers, w)
+		}
+	}
+
+	if len(workers) == 0 {
+		return ""
+	}
+
+	ret := workers[mrand.Intn(len(workers))]
+	s.workers[ret] = workerPending
+	return ret
 }
 
 func (s *Server) startJob(name string) {
@@ -274,6 +314,11 @@ func (s *Server) startJob(name string) {
 	rows.Close()
 
 	worker := s.pickWorker()
+	for worker == "" {
+		time.Sleep(time.Minute) // TODO: this is way too ugly...
+		worker = s.pickWorker()
+	}
+
 	s.q(`update jobs set worker=?, state=? where name=?`,
 		worker, int(Crawling), name,
 	)

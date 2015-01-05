@@ -8,7 +8,9 @@ import (
 
 func worker() {
 	archive := flag.String("a", "", "archive prefix")
+	serverAddr := flag.String("s", "localhost:5301", "callback address")
+	workerAddr := flag.String("w", "localhost:5353", "worker name")
 	flag.Parse()
 
-	dig8.WorkerServe(*archive)
+	dig8.WorkerServe(*archive, *serverAddr, *workerAddr)
 }

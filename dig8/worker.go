@@ -6,6 +6,7 @@ import (
 	"net/http"
 	"net/rpc"
 	"strings"
+	"time"
 
 	"lonnie.io/dig8/dns8"
 )
@@ -13,7 +14,11 @@ import (
 // Worker is an RPC server that takes job requests and
 // performs jobs.
 type Worker struct {
-	archive string // the archive path
+	archive    string // the archive path
+	serverAddr string // for heartbeat
+	workerAddr string // for heartbeat
+
+	quotas chan bool
 }
 
 func checkIdent(s string) bool {
@@ -40,6 +45,8 @@ func checkIdent(s string) bool {
 	return true
 }
 
+const nconcurrent = 3
+
 func checkName(name string) bool {
 	p := strings.Index(name, ".")
 	if p == -1 {
@@ -50,6 +57,35 @@ func checkName(name string) bool {
 	file := name[p+1:]
 
 	return checkIdent(folder) && checkIdent(file)
+}
+
+func (w *Worker) heartbeat() {
+	for {
+		c, e := rpc.DialHTTP("tcp", w.serverAddr)
+		if e != nil {
+			time.Sleep(time.Minute)
+			continue
+		}
+
+		state := workerIdle
+		if len(w.quotas) == 0 {
+			state = workerBusy
+		}
+
+		var err string
+		e = c.Call("Cb.Heartbeat", &WorkerState{
+			Worker: w.workerAddr,
+			State:  state,
+		}, &err)
+
+		if e != nil {
+			log.Print(e)
+		} else if err != "" {
+			log.Print(err)
+		}
+
+		time.Sleep(time.Second * 5)
+	}
 }
 
 // Crawl is an RPC routine that accepts a request for crawling
@@ -78,24 +114,37 @@ func (w *Worker) Crawl(req *JobRequest, err *string) error {
 	} else {
 		j.archive = req.Archive
 	}
-	go j.run()
+	go func() {
+		<-w.quotas
+		j.run()
+		<-j.jobDone
+		w.quotas <- true
+	}()
 
 	*err = "" // no error
 	return nil
 }
 
 // WorkerServe runs a slave on a archive path on this machine.
-func WorkerServe(archivePath string) {
+func WorkerServe(archivePath, serverAddr, workerAddr string) {
 	w := &Worker{
-		archive: archivePath,
+		archive:    archivePath,
+		serverAddr: serverAddr,
+		workerAddr: workerAddr,
 	}
+
+	w.quotas = make(chan bool, nconcurrent)
+	for i := 0; i < nconcurrent; i++ {
+		w.quotas <- true
+	}
+
+	go w.heartbeat()
 
 	s := rpc.NewServer()
 	e := s.RegisterName("Worker", w)
 	if e != nil {
 		log.Fatal(e)
 	}
-	rpc.HandleHTTP()
 
 	addr := ":5353"
 	log.Printf("listening on: %q\n", addr)
