@@ -8,3 +8,7 @@ type JobProgress struct {
 	Done    bool
 	Error   string
 }
+
+func (p *JobProgress) done() bool {
+	return p.Done || p.Error != ""
+}

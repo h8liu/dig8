@@ -77,7 +77,7 @@ func pump() {
 
 		if n == 0 {
 			if !wasSleeping {
-				log.Printf("queue empty\n", n)
+				log.Printf("queue empty\n")
 				log.Printf("sleeping")
 				wasSleeping = true
 				time.Sleep(time.Minute)

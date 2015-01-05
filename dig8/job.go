@@ -127,7 +127,11 @@ func (j *job) failOn(e error) bool {
 
 func (j *job) run() {
 	log.Printf("[%s] job started", j.name)
-	defer log.Printf("[%s] job done", j.name)
+	defer func() {
+		log.Printf("[%s] job done", j.name)
+		j.jobDone <- true
+	}()
+
 	defer j.cleanup()
 
 	dbPath := j.name + ".db"
@@ -302,6 +306,7 @@ func (j *job) writeOut() {
 
 		if len(ticker) > 0 {
 			// report progress
+			<-ticker
 			j.cb()
 		}
 	}
@@ -352,6 +357,4 @@ func (j *job) writeOut() {
 
 	j.progress.Done = true
 	j.cb()
-
-	j.jobDone <- true
 }

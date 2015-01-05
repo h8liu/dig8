@@ -61,6 +61,7 @@ func InitDB(dbPath string) {
 // Server is a server working on a database.
 type Server struct {
 	db     *sql.DB
+	dbLock sync.Mutex
 	cbAddr string
 
 	workersLock sync.Mutex
@@ -120,6 +121,8 @@ func (s *Server) ServeCallback() {
 
 // db.Exec wrapper
 func (s *Server) q(sql string, args ...interface{}) sql.Result {
+	s.dbLock.Lock()
+	defer s.dbLock.Unlock()
 	res, e := s.db.Exec(sql, args...)
 	qne(sql, e)
 	return res
@@ -127,6 +130,8 @@ func (s *Server) q(sql string, args ...interface{}) sql.Result {
 
 // db.Query wrapper
 func (s *Server) qs(sql string, args ...interface{}) *sql.Rows {
+	s.dbLock.Lock()
+	defer s.dbLock.Unlock()
 	rows, e := s.db.Query(sql, args...)
 	qne(sql, e)
 	return rows
@@ -191,7 +196,7 @@ func (s *Server) Callback() *CallbackServer { return &CallbackServer{s} }
 
 // Progress updates the progress.
 func (s *Server) Progress(p *JobProgress, err *string) error {
-	log.Println("Progres: ", jsonEncode(p))
+	log.Println("Progress: ", jsonEncode(p))
 
 	state := Crawling
 	if p.Error != "" {
@@ -347,7 +352,7 @@ func (s *Server) startJob(name string) {
 
 // NewJob creates a new job
 func (s *Server) NewJob(j *NewJob, err *string) error {
-	log.Println("NewJob: ", jsonEncode(j))
+	// log.Println("NewJob: ", jsonEncode(j))
 
 	nsample := len(j.Domains)
 	if nsample > 20 {

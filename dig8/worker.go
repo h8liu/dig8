@@ -45,7 +45,7 @@ func checkIdent(s string) bool {
 	return true
 }
 
-const nconcurrent = 3
+const nconcurrent = 2
 
 func checkName(name string) bool {
 	p := strings.Index(name, ".")
@@ -126,7 +126,7 @@ func (w *Worker) Crawl(req *JobRequest, err *string) error {
 }
 
 // WorkerServe runs a slave on a archive path on this machine.
-func WorkerServe(archivePath, serverAddr, workerAddr string) {
+func WorkerServe(archivePath, serverAddr, workerAddr, listenAddr string) {
 	w := &Worker{
 		archive:    archivePath,
 		serverAddr: serverAddr,
@@ -146,10 +146,9 @@ func WorkerServe(archivePath, serverAddr, workerAddr string) {
 		log.Fatal(e)
 	}
 
-	addr := ":5353"
-	log.Printf("listening on: %q\n", addr)
+	log.Printf("listening on: %q\n", listenAddr)
 
-	conn, e := net.Listen("tcp", addr)
+	conn, e := net.Listen("tcp", listenAddr)
 	if e != nil {
 		log.Fatal("listen error:", e)
 	}

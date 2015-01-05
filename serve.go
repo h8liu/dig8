@@ -9,15 +9,6 @@ import (
 	"lonnie.io/dig8/dig8"
 )
 
-var (
-	dbPath   = flag.String("db", "jobs.db", "database path")
-	doDbInit = flag.Bool("init", false, "init database")
-	doHttp   = flag.Bool("h", false, "start http server")
-	httpAddr = flag.String("http", ":5380", "serving address")
-	rpcAddr  = flag.String("rpc", "localhost:5300", "rpc management address")
-	cbAddr   = flag.String("cb", "localhost:5301", "callback address")
-)
-
 func wwwPath() string {
 	pkg, e := build.Import("lonnie.io/dig8", "", build.FindOnly)
 	ne(e)
@@ -28,6 +19,12 @@ func wwwPath() string {
 // rpcAddr (port 5300 default): rpc interface
 // cbAddr (port 5301 default): callback interface
 func serve() {
+	dbPath := flag.String("db", "jobs.db", "database path")
+	doDbInit := flag.Bool("init", false, "init database")
+	doHttp := flag.Bool("www", false, "start http server")
+	httpAddr := flag.String("http", ":5380", "serving address")
+	rpcAddr := flag.String("rpc", "localhost:5300", "rpc management address")
+	cbAddr := flag.String("cb", "localhost:5301", "callback address")
 	flag.Parse()
 
 	if *doDbInit {
