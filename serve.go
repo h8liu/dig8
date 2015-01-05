@@ -12,6 +12,7 @@ import (
 var (
 	dbPath   = flag.String("db", "jobs.db", "database path")
 	doDbInit = flag.Bool("init", false, "init database")
+	doHttp   = flag.Bool("h", false, "start http server")
 	httpAddr = flag.String("http", ":5380", "serving address")
 	rpcAddr  = flag.String("rpc", "localhost:5300", "rpc management address")
 	cbAddr   = flag.String("cb", "localhost:5301", "callback address")
@@ -37,12 +38,14 @@ func serve() {
 	s, e := dig8.NewServer(*dbPath, *cbAddr)
 	ne(e)
 
-	go s.ServeRPC(*rpcAddr)
-	go s.ServeCallback()
-
-	http.Handle("/", http.FileServer(http.Dir(wwwPath())))
-	http.Handle("/jobs/", s)
-	for {
-		le(http.ListenAndServe(*httpAddr, nil))
+	if !*doHttp {
+		go s.ServeRPC(*rpcAddr)
+		s.ServeCallback()
+	} else {
+		http.Handle("/", http.FileServer(http.Dir(wwwPath())))
+		http.Handle("/jobs/", s)
+		for {
+			le(http.ListenAndServe(*httpAddr, nil))
+		}
 	}
 }
