@@ -28,11 +28,13 @@ func main() {
 		serve()
 	case "pump":
 		pump()
+	case "-h":
+		fmt.Println(helpMsg)
 	default:
 		if mode != "" {
 			fmt.Fprintf(os.Stderr, "error: invalid command %q\n", mode)
 		}
-		fmt.Fprintf(os.Stderr, helpMsg)
+		fmt.Fprintln(os.Stderr, helpMsg)
 		os.Exit(-1)
 	}
 }
@@ -43,5 +45,4 @@ const helpMsg = `Available commands:
     create  create a job and send it to server
     dig     test a domain
     serve   launch a dns crawling master
-    pump    pump domains from the domain queue
-`
+    pump    pump domains from the domain queue`
