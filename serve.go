@@ -36,7 +36,7 @@ func serve() {
 		return
 	}
 
-	s, e := dig8.NewServer(*dbPath)
+	s, e := dig8.NewServer(*dbPath, *cbAddr)
 	ne(e)
 
 	go func() {

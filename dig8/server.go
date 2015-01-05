@@ -6,10 +6,12 @@ import (
 	"database/sql"
 	"encoding/base32"
 	"encoding/json"
+	"errors"
 	"io"
 	"io/ioutil"
 	"log"
 	"net/http"
+	"net/rpc"
 	"os"
 	"strings"
 	"time"
@@ -55,10 +57,11 @@ func InitDB(dbPath string) {
 // Server is a server working on a database.
 type Server struct {
 	db *sql.DB
+	cbAddr string
 }
 
 // NewServer creates a new server working on a database.
-func NewServer(dbPath string) (*Server, error) {
+func NewServer(dbPath string, cbAddr string) (*Server, error) {
 	ret := new(Server)
 
 	db, e := sql.Open("sqlite3", dbPath)
@@ -67,15 +70,19 @@ func NewServer(dbPath string) (*Server, error) {
 	}
 
 	ret.db = db
+	ret.cbAddr = cbAddr
+
 	return ret, nil
 }
 
+// db.Exec wrapper
 func (s *Server) q(sql string, args ...interface{}) sql.Result {
 	res, e := s.db.Exec(sql, args...)
 	qne(sql, e)
 	return res
 }
 
+// db.Query wrapper
 func (s *Server) qs(sql string, args ...interface{}) *sql.Rows {
 	rows, e := s.db.Query(sql, args...)
 	qne(sql, e)
@@ -207,6 +214,10 @@ func (s *Server) createJob(doms []string, name string) {
 	s.q(`update jobs set state=? where name=?`, int(Created), name)
 }
 
+func (s *Server) pickWorker() string {
+	return "localhost:5353"
+}
+
 func (s *Server) startJob(name string) {
 	bs, e := ioutil.ReadFile(name)
 	if e != nil {
@@ -215,20 +226,34 @@ func (s *Server) startJob(name string) {
 	}
 
 	doms := strings.Split(string(bs), "\n")
-	total := len(doms)
+	// total := len(doms)
 
-	go func(name string, total int) {
-		// TODO:
-		time.Sleep(time.Second * 10)
-		var str string
-		ne(s.Progress(&JobProgress{
-			Name:    name,
-			Crawled: total,
-			Total:   total,
-			Done:    true,
-			Error:   "",
-		}, &str))
-	}(name, total)
+	worker := s.pickWorker()
+	s.q(`update job set worker=?, state=? where name=?`,
+		worker, int(Crawling), name,
+	)
+
+	c, e := rpc.DialHTTP("tcp", worker)
+	if e != nil {
+		s.errorJob(name, e)
+		return
+	}
+
+	req := new(JobRequest)
+	req.Name = name
+	req.Domains = doms
+	req.Callback = s.cbAddr
+
+	var err string
+	e = c.Call("Worker.Crawl", req, &err)
+	if e != nil {
+		s.errorJob(name, e)
+		return
+	}
+	if err != "" {
+		s.errorJob(name, errors.New(err))
+		return
+	}
 }
 
 // NewJob creates a new job
@@ -272,9 +297,10 @@ func (s *Server) NewJob(j *NewJob, err *string) error {
 	}
 
 	s.createJob(j.Domains, name)
-	s.startJob(name)
-
 	log.Println("job %q created", name)
+
+	go s.startJob(name)
+
 	return nil
 }
 
