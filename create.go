@@ -29,6 +29,7 @@ func isValidTag(n string) bool {
 
 func create() {
 	tagName := flag.String("t", "test", "job tag name")
+	archive := flag.String("a", "test", "archive position")
 	serverAddr := flag.String("s", "localhost:5300", "rpc server address")
 	flag.Parse()
 
@@ -53,6 +54,7 @@ func create() {
 	}
 
 	job.Tag = *tagName
+	job.Archive = *archive
 	for _, line := range lines {
 		line = strings.TrimSpace(line)
 		if line == "" {
