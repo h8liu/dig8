@@ -4,5 +4,6 @@ package dig8
 type JobRequest struct {
 	Name     string
 	Domains  []string
+	Archive  string
 	Callback string
 }

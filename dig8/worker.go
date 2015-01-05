@@ -73,7 +73,11 @@ func (w *Worker) Crawl(req *JobRequest, err *string) error {
 
 	// ready to run now
 	j := newJob(req.Name, doms, req.Callback)
-	j.archive = w.archive
+	if req.Archive == "" {
+		j.archive = w.archive
+	} else {
+		j.archive = req.Archive
+	}
 	go j.run()
 
 	*err = "" // no error

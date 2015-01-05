@@ -41,6 +41,7 @@ func InitDB(dbPath string) {
 
 	q(`create table jobs (
 		name text not null primary key,
+		archive text not null,
 		state int not null,
 		total int not null,
 		crawled int not null,
@@ -198,6 +199,7 @@ func (s *Server) Progress(p *JobProgress, err *string) error {
 // NewJob is a new job request
 type NewJob struct {
 	Tag     string
+	Archive string // archive saving position
 	Domains []string
 }
 
@@ -205,17 +207,20 @@ const encodeHex = "0123456789abcdefghijklmnopqrstuv"
 
 var base32enc = base32.NewEncoding(encodeHex)
 
-func (s *Server) errorJob(name string, e error) {
-	log.Println("job %q error: %s", name, e)
+func (s *Server) errorJob(name string, e error) bool {
+	if e == nil {
+		return false
+	}
+	log.Printf("job %q error: %s", name, e)
 	s.q(`update jobs set state=? err=? where name=?`,
 		int(Errored), e.Error(), name,
 	)
+	return true
 }
 
 func (s *Server) createJob(doms []string, name string) {
 	f, e := os.Create(name)
-	if e != nil {
-		s.errorJob(name, e)
+	if s.errorJob(name, e) {
 		return
 	}
 
@@ -235,11 +240,7 @@ func (s *Server) createJob(doms []string, name string) {
 		return
 	}
 
-	e = f.Close()
-	if e != nil {
-		s.errorJob(name, e)
-		return
-	}
+	s.errorJob(name, f.Close())
 
 	s.q(`update jobs set state=? where name=?`, int(Created), name)
 }
@@ -250,13 +251,27 @@ func (s *Server) pickWorker() string {
 
 func (s *Server) startJob(name string) {
 	bs, e := ioutil.ReadFile(name)
-	if e != nil {
-		s.errorJob(name, e)
+	if s.errorJob(name, e) {
 		return
 	}
 
 	doms := strings.Split(string(bs), "\n")
 	// total := len(doms)
+
+	rows := s.qs("select archive from jobs where name=?", name)
+	if !rows.Next() {
+		log.Printf("row missing or error: %s", name)
+		return
+	}
+	var archive string
+
+	if s.errorJob(name, rows.Scan(&archive)) {
+		return
+	}
+	if s.errorJob(name, rows.Err()) {
+		return
+	}
+	rows.Close()
 
 	worker := s.pickWorker()
 	s.q(`update jobs set worker=?, state=? where name=?`,
@@ -264,20 +279,19 @@ func (s *Server) startJob(name string) {
 	)
 
 	c, e := rpc.DialHTTP("tcp", worker)
-	if e != nil {
-		s.errorJob(name, e)
+	if s.errorJob(name, e) {
 		return
 	}
 
 	req := new(JobRequest)
 	req.Name = name
 	req.Domains = doms
+	req.Archive = archive
 	req.Callback = s.cbAddr
 
 	var err string
 	e = c.Call("Worker.Crawl", req, &err)
-	if e != nil {
-		s.errorJob(name, e)
+	if s.errorJob(name, e) {
 		return
 	}
 	if err != "" {
@@ -312,13 +326,16 @@ func (s *Server) NewJob(j *NewJob, err *string) error {
 		hash := sha1.New()
 		hash.Write(salt[:])
 		io.WriteString(hash, sample)
-		name = j.Tag + "." + base32enc.EncodeToString(hash.Sum(nil))[:6]
+		name = base32enc.EncodeToString(hash.Sum(nil))[:6]
+		if j.Tag != "" {
+			name = j.Tag + "." + name
+		}
 
 		res := s.q(`insert or ignore into jobs 
-			(name, state, total, crawled, sample, salt, birth)
+			(name, archive, state, total, crawled, sample, salt, birth)
 			values
-			(?, ?, ?, ?, ?, ?, ?)`,
-			name, int(Registered), len(j.Domains), 0,
+			(?, ?, ?, ?, ?, ?, ?, ?)`,
+			name, j.Archive, int(Registered), len(j.Domains), 0,
 			sample, saltStr, createTime,
 		)
 

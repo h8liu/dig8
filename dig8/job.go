@@ -7,6 +7,7 @@ import (
 	"log"
 	"net/rpc"
 	"os"
+	"path/filepath"
 	"time"
 
 	_ "github.com/mattn/go-sqlite3" // sqlite3 db support
@@ -310,7 +311,15 @@ func (j *job) writeOut() {
 
 	j.cb()
 
-	fout, err := os.Create(j.archive + j.name)
+	if j.archive != "" {
+		e := os.MkdirAll(j.archive, 0770)
+		if chkerr(e) {
+			return
+		}
+	}
+
+	name := filepath.Join(j.archive, j.name)
+	fout, err := os.Create(name)
 	if chkerr(err) {
 		return
 	}

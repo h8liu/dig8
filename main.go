@@ -29,8 +29,19 @@ func main() {
 	case "pump":
 		pump()
 	default:
-		fmt.Fprintf(os.Stderr, "error: invalid command %q\n", mode)
-		fmt.Fprintf(os.Stderr, "try worker, send or dig\n")
+		if mode != "" {
+			fmt.Fprintf(os.Stderr, "error: invalid command %q\n", mode)
+		}
+		fmt.Fprintf(os.Stderr, helpMsg)
 		os.Exit(-1)
 	}
 }
+
+const helpMsg = `Available commands:
+    worker  launch a dns crawling worker
+    send    send a job to a worker
+    create  create a job and send it to server
+    dig     test a domain
+    serve   launch a dns crawling master
+    pump    pump domains from the domain queue
+`
