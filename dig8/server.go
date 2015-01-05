@@ -56,7 +56,7 @@ func InitDB(dbPath string) {
 
 // Server is a server working on a database.
 type Server struct {
-	db *sql.DB
+	db     *sql.DB
 	cbAddr string
 }
 
