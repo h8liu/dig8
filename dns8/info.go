@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
+	"log"
 )
 
 // Info is a query task that gets all the related records.
@@ -248,7 +249,7 @@ func newInfoResult(domain string) *infoResult {
 func jmarsh(v interface{}) []byte {
 	ret, e := json.Marshal(v)
 	if e != nil {
-		panic(e)
+		log.Fatal(e)
 	}
 	return ret
 }

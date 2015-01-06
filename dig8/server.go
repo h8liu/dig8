@@ -317,6 +317,7 @@ func (s *Server) startOldJobs() {
 }
 
 func (s *Server) startJob(name string) {
+	log.Println("start job: ", name)
 	bs, e := ioutil.ReadFile(name)
 	if s.errorJob(name, e) {
 		return
