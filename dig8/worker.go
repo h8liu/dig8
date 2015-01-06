@@ -45,7 +45,7 @@ func checkIdent(s string) bool {
 	return true
 }
 
-const nconcurrent = 2
+const nconcurrent = 3
 
 func checkName(name string) bool {
 	p := strings.Index(name, ".")

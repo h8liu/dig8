@@ -198,7 +198,14 @@ func (s *Server) Callback() *CallbackServer { return &CallbackServer{s} }
 
 // Progress updates the progress.
 func (s *Server) Progress(p *JobProgress, err *string) error {
-	log.Println("Progress: ", jsonEncode(p))
+	// log.Println("Progress: ", jsonEncode(p))
+	if p.Error != "" {
+		log.Printf("%s: %d/%d err: %s", p.Name, p.Crawled, p.Total, p.Error)
+	} else if p.Done {
+		log.Printf("%s: %d/%d done", p.Name, p.Crawled, p.Total)
+	} else {
+		log.Printf("%s: %d/%d", p.Name, p.Crawled, p.Total)
+	}
 
 	state := Crawling
 	if p.Error != "" {

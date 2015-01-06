@@ -2,8 +2,8 @@ package dns8
 
 import (
 	"math/rand"
-	"time"
 	"sync"
+	"time"
 )
 
 // TODO: use a better entropy source
