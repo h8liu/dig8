@@ -242,7 +242,7 @@ func (s *Server) errorJob(name string, e error) bool {
 		return false
 	}
 	log.Printf("job %q error: %s", name, e)
-	s.q(`update jobs set state=? err=? where name=?`,
+	s.q(`update jobs set state=?, err=? where name=?`,
 		int(Errored), e.Error(), name,
 	)
 	return true

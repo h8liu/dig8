@@ -84,6 +84,11 @@ func (w *Worker) heartbeat() {
 			log.Print(err)
 		}
 
+		e = c.Close()
+		if e != nil {
+			log.Print(e)
+		}
+
 		time.Sleep(time.Second * 5)
 	}
 }
