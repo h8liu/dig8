@@ -10,6 +10,9 @@ var random = rand.New(rand.NewSource(time.Now().UnixNano()))
 
 func shuffleAppend(ret, list []*NameServer) []*NameServer {
 	n := len(list)
+	if n == 0 {
+		return make([]*NameServer, 0)
+	}
 	order := random.Perm(n)
 	for i := 0; i < n; i++ {
 		ret = append(ret, list[order[i]])
@@ -19,6 +22,9 @@ func shuffleAppend(ret, list []*NameServer) []*NameServer {
 
 func shuffleList(list []*NameServer) []*NameServer {
 	n := len(list)
+	if n == 0 {
+		return make([]*NameServer, 0)
+	}
 	ret := make([]*NameServer, n)
 	order := random.Perm(n)
 	for i := 0; i < n; i++ {
