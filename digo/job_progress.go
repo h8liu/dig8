@@ -1,4 +1,4 @@
-package dig8
+package digo
 
 // JobProgress is a crawler job feedback packet
 type JobProgress struct {

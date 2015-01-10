@@ -7,7 +7,7 @@ import (
 	"net/rpc"
 	"strings"
 
-	"lonnie.io/dig8/dig8"
+	"lonnie.io/dig8/digo"
 	"lonnie.io/dig8/dns8"
 )
 
@@ -45,7 +45,7 @@ func create() {
 	ne(e)
 
 	lines := strings.Split(string(bs), "\n")
-	job := new(dig8.NewJob)
+	job := new(digo.NewJob)
 
 	if *tagName == "" {
 		log.Fatal("error: empty tag")

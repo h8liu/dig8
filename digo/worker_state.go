@@ -1,4 +1,4 @@
-package dig8
+package digo
 
 const (
 	workerError = iota

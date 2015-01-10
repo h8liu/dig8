@@ -3,7 +3,7 @@ package main
 import (
 	"flag"
 
-	"lonnie.io/dig8/dig8"
+	"lonnie.io/dig8/digo"
 )
 
 func worker() {
@@ -13,5 +13,5 @@ func worker() {
 	listenAddr := flag.String("l", "localhost:5353", "listen address")
 	flag.Parse()
 
-	dig8.WorkerServe(*archive, *serverAddr, *workerAddr, *listenAddr)
+	digo.WorkerServe(*archive, *serverAddr, *workerAddr, *listenAddr)
 }

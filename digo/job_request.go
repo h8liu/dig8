@@ -1,4 +1,4 @@
-package dig8
+package digo
 
 // JobRequest is a crawling request for a list of domains.
 type JobRequest struct {

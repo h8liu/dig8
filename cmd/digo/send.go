@@ -8,7 +8,7 @@ import (
 	"path/filepath"
 	"strings"
 
-	"lonnie.io/dig8/dig8"
+	"lonnie.io/dig8/digo"
 )
 
 func send() {
@@ -28,7 +28,7 @@ func send() {
 	bs, e := ioutil.ReadFile(inputPath)
 	ne(e)
 
-	req := new(dig8.JobRequest)
+	req := new(digo.JobRequest)
 
 	doms := strings.Split(string(bs), "\n")
 	for _, d := range doms {

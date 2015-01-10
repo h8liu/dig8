@@ -11,7 +11,7 @@ import (
 
 	"github.com/garyburd/redigo/redis"
 
-	"lonnie.io/dig8/dig8"
+	"lonnie.io/dig8/digo"
 	"lonnie.io/dig8/dns8"
 )
 
@@ -128,7 +128,7 @@ func pump() {
 
 		total := 0
 		for arch, doms := range set {
-			job := &dig8.NewJob{
+			job := &digo.NewJob{
 				Tag:     "feed",
 				Archive: arch,
 				Domains: doms,
