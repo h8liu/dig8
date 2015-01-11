@@ -20,7 +20,6 @@ type job struct {
 	archive  string
 	domains  []*dns8.Domain
 	callback string
-	crawled  int
 	progress *JobProgress
 
 	db     *sql.DB
