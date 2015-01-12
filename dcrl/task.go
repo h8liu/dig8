@@ -10,6 +10,7 @@ import (
 type task struct {
 	domain *dns8.Domain
 	client *dns8.Client
+	id     int
 
 	res string // result
 	out string // output
