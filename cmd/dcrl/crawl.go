@@ -1,17 +1,14 @@
 package main
 
 import (
-	"bufio"
 	"bytes"
 	"flag"
 	"fmt"
 	"log"
 	"os"
 	"path/filepath"
-	"strings"
 
 	"lonnie.io/dig8/dcrl"
-	"lonnie.io/dig8/dns8"
 )
 
 func crawl() {
@@ -35,7 +32,7 @@ func crawl() {
 		jobName = filepath.Base(input)
 	}
 
-	doms, e := readDomains(input)
+	doms, e := dcrl.ReadDomains(input)
 	if e != nil {
 		log.Fatal(e)
 	}
@@ -52,39 +49,6 @@ func crawl() {
 	if e != nil {
 		log.Fatal(e)
 	}
-}
-
-func readDomains(path string) ([]*dns8.Domain, error) {
-	fin, e := os.Open(path)
-	if e != nil {
-		return nil, e
-	}
-
-	defer fin.Close()
-
-	s := bufio.NewScanner(fin)
-	var ret []*dns8.Domain
-
-	for s.Scan() {
-		line := s.Text()
-		line = strings.TrimSpace(line)
-		if line == "" {
-			continue
-		}
-
-		d, e := dns8.ParseDomain(line)
-		if e != nil {
-			return nil, e
-		}
-		ret = append(ret, d)
-	}
-
-	e = s.Err()
-	if e != nil {
-		return nil, e
-	}
-
-	return ret, nil
 }
 
 func jobProgress(p *dcrl.Progress) {

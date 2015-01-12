@@ -48,12 +48,13 @@ func ValidJobName(name string) bool {
 
 // Job is a crawler job that contains a list of domains
 type Job struct {
-	Name     string
-	DB       string
-	Archive  string
-	Domains  []*dns8.Domain
+	Name    string
+	Archive string
+	Domains []*dns8.Domain
+
 	Progress func(p *Progress) // progress report function
 
+	DB string
 	db *sql.DB
 }
 

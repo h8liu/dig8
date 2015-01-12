@@ -2,7 +2,6 @@ package dns8
 
 import (
 	"encoding/hex"
-	"fmt"
 	"log"
 	"net"
 	"time"
@@ -18,6 +17,8 @@ type Client struct {
 	sendErrors chan *job
 	recvs      chan *Message
 	timer      <-chan time.Time
+
+	Logger *log.Logger
 }
 
 // NewClientPort creates a client at a particular port
@@ -65,14 +66,18 @@ func (c *Client) recv() {
 	for {
 		n, addr, e := c.conn.ReadFromUDP(buf)
 		if e != nil {
-			log.Print("recv:", e)
+			if c.Logger != nil {
+				c.Logger.Print("recv:", e)
+			}
 			continue
 		}
 
 		p, e := Unpack(buf[:n])
 		if e != nil {
-			log.Print("unpack: ", e)
-			fmt.Println(hex.Dump(buf[:n]))
+			if c.Logger != nil {
+				c.Logger.Print("unpack: ", e)
+				c.Logger.Print(hex.Dump(buf[:n]))
+			}
 
 			continue
 		}
@@ -117,8 +122,10 @@ func (c *Client) serve() {
 			id := m.Packet.ID
 			job := c.jobs[id]
 			if job == nil {
-				// this might happen with the timeout window is set too small
-				log.Printf("recved zombie msg with id %d", id)
+				// might happen when the timeout window is too small
+				if c.Logger != nil {
+					c.Logger.Printf("recved zombie msg with id %d", id)
+				}
 			} else {
 				bugOn(job.id != id)
 				job.CloseRecv(m)
