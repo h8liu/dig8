@@ -2,6 +2,7 @@ package dcrl
 
 import (
 	"database/sql"
+	"fmt"
 	"log"
 	"os"
 	"path/filepath"
@@ -19,6 +20,30 @@ type Progress struct {
 	Total   int
 	Done    bool
 	Error   string
+}
+
+// ValidJobName checks if the job name is valid.
+func ValidJobName(name string) bool {
+	if name == "" {
+		return false
+	}
+
+	for _, r := range name {
+		if r >= 'a' && r <= 'z' {
+			continue
+		}
+		if r >= 'A' && r <= 'Z' {
+			continue
+		}
+		if r >= '0' && r <= '9' {
+			continue
+		}
+		if r == '-' || r == '_' {
+			continue
+		}
+		return false
+	}
+	return true
 }
 
 // Job is a crawler job that contains a list of domains
@@ -192,6 +217,11 @@ func (j *Job) crawl() error {
 		select {
 		case <-ticker:
 			j.prog(n)
+			err = ins.Flush()
+			if err != nil {
+				close(finished)
+				return err
+			}
 		case t := <-finished:
 			err = ins.Insert(t)
 			if err != nil {
@@ -202,21 +232,27 @@ func (j *Job) crawl() error {
 		}
 	}
 
+	ins.Close()
+
 	j.prog(n)
 
 	return nil
 }
 
 func (j *Job) writeOut() error {
+	var outPath = j.Name
+
 	if j.Archive != "" {
 		e := os.MkdirAll(j.Archive, 0770)
 		if e != nil {
 			return e
 		}
+		outPath = filepath.Join(j.Archive, j.Name)
+	} else {
+		outPath = j.Name + ".out"
 	}
 
-	name := filepath.Join(j.Archive, j.Name)
-	fout, err := os.Create(name)
+	fout, err := os.Create(outPath)
 	if err != nil {
 		return err
 	}
@@ -250,6 +286,10 @@ func (j *Job) writeOut() error {
 
 // Do performs the job.
 func (j *Job) Do() error {
+	if !ValidJobName(j.Name) {
+		return fmt.Errorf("invalid job name %q", j.Name)
+	}
+
 	log.Printf("[%s] job started", j.Name)
 	defer log.Printf("[%s] job finished", j.Name)
 	defer func() {
