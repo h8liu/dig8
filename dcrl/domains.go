@@ -76,6 +76,7 @@ func WriteDomains(f string, doms []*dns8.Domain) error {
 	return fout.Close()
 }
 
+// WriteDomainStrings writes a list of domain strings to a file
 func WriteDomainStrings(f string, doms []string) error {
 	fout, e := os.Create(f)
 	if e != nil {
