@@ -17,12 +17,13 @@ func InitDB(dbPath string) error {
 	_, e = db.Exec(`create table jobs (
 		name text not null primary key,
 		archive text not null default "",
-		state int not null detault 0,
 		total int not null default 0,
-		crawled int not null default 0,
 		sample text not null default "",
 		salt text not null default "",
+		state int not null detault 0,
 		worker text not null default "",
+		crawled int not null default 0,
+		retried int not null default 0,
 		err text not null default "",
 		tcreate text not null default "",
 		tupdate text not null default "",
@@ -74,17 +75,38 @@ func ne(e error) {
 func query(db *sql.DB, q string, args ...interface{}) *sql.Rows {
 	rows, e := db.Query(q, args...)
 	if e != nil {
-		log.Fatal(q)
+		log.Print(q)
 		log.Fatal(e)
 	}
 	return rows
+}
+
+func exec(db *sql.DB, q string, args ...interface{}) sql.Result {
+	res, e := db.Exec(q, args...)
+	if e != nil {
+		log.Print(q)
+		log.Fatal(e)
+	}
+	return res
+}
+
+const tfmt = "2006-01-02 15:04:05"
+
+func timeNow() string {
+	t := time.Now().UTC()
+	return t.Format(tfmt)
+}
+
+func timeAgo(d time.Duration) string {
+	t := time.Now().Add(-d).UTC()
+	return t.Format(tfmt)
 }
 
 func claimJob(s *Server, worker string, j *JobDesc) error {
 	rows := query(s.db, `
 		select name, archive from jobs 
 		where state = ? order by tcreate limit 1`,
-		State(Created),
+		int(Created),
 	)
 
 	var name, arch string
@@ -108,13 +130,77 @@ func claimJob(s *Server, worker string, j *JobDesc) error {
 	j.Archive = arch
 	j.Domains = doms
 
+	exec(s.db, `
+		update jobs set
+		worker = ?, state = ?, tupdate = ?,
+		crawled = 0, err = "", tfinish = ""
+		where name = ?`,
+		worker, int(Crawling), timeNow(),
+		name,
+	)
+
 	return nil
 }
 
 func progress(s *Server, p *Progress, hit *bool) error {
+	tnow := timeNow()
+	if p.Error != "" {
+		exec(s.db, `
+			update jobs set
+			state = ?, tupdate = ?, err = ?, tfinish = ?
+			where name = ?`,
+			int(Errored), tnow, p.Error, tnow, p.Name,
+		)
+	} else if p.Done {
+		exec(s.db, `
+			update jobs set
+			state = ?, tupdate = ?, tfinish = ?,
+			crawled = total, err = ""
+			where name = ?`,
+			int(Done), tnow, tnow, p.Name,
+		)
+	} else {
+		exec(s.db, `
+			update jobs set
+			state = ?, tupdate = ?, crawled = ?,
+			err = ""
+			where name = ?`,
+			int(Crawling), tnow, p.Crawled, p.Name,
+		)
+	}
+
 	return nil
 }
 
 func cleanJobs(s *Server) {
+	tago := timeAgo(time.Minute * 3) 
+	tnow := timeNow()
 
+	// restart the errrored ones
+	exec(s.db, `
+		update jobs set
+		state = ?, tupdate = ?
+		worker = "", crawled = 0, err = "", retried = retried + 1,
+		where state = ? and tfinish < ? and retried < 3`,
+		int(Created), tnow,
+		int(Errored), tago,
+	)
+
+	// archive the finished ones
+	exec(s.db, `
+		update jobs set
+		state = ?
+		where state = ? and tfinish < ?`,
+		int(Archived),
+		int(Done), tago,
+	)
+
+	// error the lost crawling ones
+	exec(s.db, `
+		update jobs set
+		state = ?, err = "worker lost"
+		where state = ? and tupdate < ?`,
+		int(Crawling),
+		int(Errored), tago,
+	)
 }

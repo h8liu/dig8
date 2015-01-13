@@ -1,7 +1,6 @@
 package main
 
 import (
-	"bytes"
 	"flag"
 	"fmt"
 	"log"
@@ -52,16 +51,5 @@ func crawl() {
 }
 
 func jobProgress(p *dcrl.Progress) {
-	buf := new(bytes.Buffer)
-
-	fmt.Fprintf(buf, "[%s] ", p.Name)
-	if p.Error != "" {
-		fmt.Fprintf(buf, "error: %s", p.Error)
-	} else if p.Done {
-		fmt.Fprintf(buf, "done (%d domains)", p.Total)
-	} else {
-		fmt.Fprintf(buf, "%d/%d", p.Crawled, p.Total)
-	}
-
-	log.Println(buf.String())
+	log.Println(p.String())
 }

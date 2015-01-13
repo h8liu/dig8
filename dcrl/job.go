@@ -13,15 +13,6 @@ import (
 	"lonnie.io/dig8/dns8"
 )
 
-// Progress reports how much a job is crawled
-type Progress struct {
-	Name    string
-	Crawled int
-	Total   int
-	Done    bool
-	Error   string
-}
-
 // ValidJobName checks if the job name is valid.
 func ValidJobName(name string) bool {
 	if name == "" {
