@@ -67,7 +67,13 @@ func serve(s *Server) error {
 				worker := req.data.(string)
 				j := req.reply.(*JobDesc)
 				e := claimJob(s, worker, j)
-				log.Printf("[%s] claimed by %s", j.Name, worker)
+				if e == nil {
+					if j.Name != "" {
+						log.Printf("[%s] claimed by %s", j.Name, worker)
+					}
+				} else {
+					log.Print(e)
+				}
 				req.c <- e
 			case "progress":
 				p := req.data.(*Progress)
@@ -78,9 +84,13 @@ func serve(s *Server) error {
 				j := req.data.(*NewJobDesc)
 				name := req.reply.(*string)
 				e := newJob(s, j, name)
-				log.Printf("[%s] created: %d domains",
-					*name, len(j.Domains),
-				)
+				if e == nil {
+					log.Printf("[%s] created: %d domains",
+						*name, len(j.Domains),
+					)
+				} else {
+					log.Print(e)
+				}
 				req.c <- e
 			default:
 				log.Printf("error: unknown request %q", req.typ)
@@ -195,6 +205,7 @@ func claimJob(s *Server, worker string, j *JobDesc) error {
 	ne(rows.Close())
 
 	if name == "" {
+		j.Name = ""
 		return nil
 	}
 

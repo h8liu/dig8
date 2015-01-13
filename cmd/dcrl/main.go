@@ -39,5 +39,6 @@ func main() {
 const helpMsg = `Avaliable commands:
 	server  runs the crawler server
 	worker  runs a crawler worker
+	new     create a new job from a domain list
 	crawl   crawls a single job
 `

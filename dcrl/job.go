@@ -29,7 +29,7 @@ func ValidJobName(name string) bool {
 		if r >= '0' && r <= '9' {
 			continue
 		}
-		if r == '-' || r == '_' {
+		if r == '-' || r == '_' || r == '.' {
 			continue
 		}
 		return false
@@ -41,53 +41,63 @@ func ValidJobName(name string) bool {
 type Job struct {
 	Name    string
 	Archive string
+	Log     string
+
 	Domains []*dns8.Domain
+	DB      string
 
-	Progress func(p *Progress) // progress report function
+	Progress func(p *Progress) error // progress report function
 
-	DB string
 	db *sql.DB
 }
 
-func (j *Job) reportProg(p *Progress) {
+func (j *Job) reportProg(p *Progress) error {
 	if j.Progress == nil {
-		return
+		return nil
 	}
-	j.Progress(p)
+	return j.Progress(p)
 }
 
-func (j *Job) prog(crawled int) {
+func (j *Job) prog(crawled int) error {
 	ret := new(Progress)
 	ret.Name = j.Name
 	ret.Total = len(j.Domains)
 	ret.Crawled = crawled
 
-	j.reportProg(ret)
+	return j.reportProg(ret)
 }
 
-func (j *Job) errProg(e error) {
+func (j *Job) errProg(e error) error {
 	ret := new(Progress)
 	ret.Name = j.Name
 	ret.Total = len(j.Domains)
 	ret.Done = true
 	ret.Error = e.Error()
 
-	j.reportProg(ret)
+	return j.reportProg(ret)
 }
 
-func (j *Job) doneProg() {
+func (j *Job) doneProg() error {
 	ret := new(Progress)
 	ret.Name = j.Name
 	ret.Total = len(j.Domains)
 	ret.Done = true
 
-	j.reportProg(ret)
+	return j.reportProg(ret)
 }
 
 func (j *Job) createDB() error {
 	dbpath := j.DB
 	if dbpath == "" {
 		dbpath = j.Name + ".db"
+	}
+
+	if j.Log != "" {
+		e := os.MkdirAll(j.Log, 0770)
+		if e != nil {
+			return e
+		}
+		dbpath = filepath.Join(j.Log, dbpath)
 	}
 
 	if _, e := os.Stat(dbpath); e == nil {
@@ -208,15 +218,23 @@ func (j *Job) crawl() error {
 	for n < len(j.Domains) {
 		select {
 		case <-ticker:
-			j.prog(n)
+			err = j.prog(n)
+			if err != nil {
+				ins.Close()
+				close(finished)
+				return err
+			}
+
 			err = ins.Flush()
 			if err != nil {
+				ins.Close()
 				close(finished)
 				return err
 			}
 		case t := <-finished:
 			err = ins.Insert(t)
 			if err != nil {
+				ins.Close()
 				close(finished)
 				return err
 			}
@@ -226,7 +244,10 @@ func (j *Job) crawl() error {
 
 	ins.Close()
 
-	j.prog(n)
+	err = j.prog(n)
+	if err != nil {
+		return err
+	}
 
 	return nil
 }
@@ -310,6 +331,5 @@ func (j *Job) Do() error {
 		return e
 	}
 
-	j.doneProg()
-	return nil
+	return j.doneProg()
 }

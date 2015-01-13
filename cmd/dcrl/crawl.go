@@ -50,6 +50,7 @@ func crawl() {
 	}
 }
 
-func jobProgress(p *dcrl.Progress) {
+func jobProgress(p *dcrl.Progress) error {
 	log.Println(p.String())
+	return nil
 }
