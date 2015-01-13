@@ -54,8 +54,8 @@ func Serve(s *Server) error {
 func serve(s *Server) error {
 	defer s.db.Close()
 
-	// ticker := time.Tick(time.Minute)
-	ticker := time.Tick(time.Second * 2)
+	ticker := time.Tick(time.Minute * 3)
+	// ticker := time.Tick(time.Second * 2)
 
 	for {
 		select {
