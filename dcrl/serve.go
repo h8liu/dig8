@@ -56,6 +56,7 @@ func serve(s *Server) error {
 
 	ticker := time.Tick(time.Minute * 3)
 	// ticker := time.Tick(time.Second * 2)
+	progLast := make(map[string]int)
 
 	for {
 		select {
@@ -78,7 +79,16 @@ func serve(s *Server) error {
 			case "progress":
 				p := req.data.(*Progress)
 				okay := req.reply.(*bool)
-				log.Print(p)
+
+				if p.Error == "" && !p.Done {
+					last, found := progLast[p.Name]
+					if !found || last != p.Crawled {
+						log.Print(p)
+					}
+					progLast[p.Name] = p.Crawled
+				} else {
+					log.Print(p)
+				}
 				req.c <- progress(s, p, okay)
 			case "newJob":
 				j := req.data.(*NewJobDesc)
