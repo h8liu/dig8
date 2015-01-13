@@ -187,7 +187,7 @@ func progress(s *Server, p *Progress, hit *bool) error {
 }
 
 func cleanJobs(s *Server) {
-	tago := timeAgo(time.Minute * 3) 
+	tago := timeAgo(time.Minute * 3)
 	tnow := timeNow()
 
 	// restart the errrored ones
