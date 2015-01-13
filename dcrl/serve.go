@@ -42,6 +42,20 @@ func InitDB(dbPath string) error {
 	return nil
 }
 
+// Serve launches the server
+func Serve(s *Server) error {
+	var e error
+	s.db, e = sql.Open("sqlite3", s.JobsDB)
+	if e != nil {
+		return e
+	}
+	defer s.db.Close()
+
+	s.requests = make(chan *request, 64)
+
+	return serve(s)
+}
+
 func serve(s *Server) error {
 	ticker := time.Tick(time.Minute)
 
