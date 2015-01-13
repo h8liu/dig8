@@ -5,8 +5,7 @@ type State int
 
 // The states of a job
 const (
-	Registered State = iota
-	Created
+	Created State = iota
 	Crawling
 	Errored
 	Done

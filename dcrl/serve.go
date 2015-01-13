@@ -1,7 +1,9 @@
 package dcrl
 
 import (
+	"crypto/rand"
 	"database/sql"
+	"encoding/base32"
 	"log"
 	"path/filepath"
 	"time"
@@ -18,8 +20,6 @@ func InitDB(dbPath string) error {
 		name text not null primary key,
 		archive text not null default "",
 		total int not null default 0,
-		sample text not null default "",
-		salt text not null default "",
 		state int not null detault 0,
 		worker text not null default "",
 		crawled int not null default 0,
@@ -114,6 +114,62 @@ func timeNow() string {
 func timeAgo(d time.Duration) string {
 	t := time.Now().Add(-d).UTC()
 	return t.Format(tfmt)
+}
+
+var enc = base32.NewEncoding(
+	"0123456789abcdefghijklmnopqrstuv",
+)
+
+func randName() string {
+	var buf [8]byte
+	_, e := rand.Read(buf[:])
+	ne(e)
+	s := enc.EncodeToString(buf[:])
+	if len(s) < 6 {
+		panic("bug")
+	}
+	return s[:6]
+}
+
+func countRows(rows *sql.Rows) int {
+	cnt := 0
+	for rows.Next() {
+		cnt++
+	}
+	ne(rows.Err())
+	ne(rows.Close())
+	return cnt
+}
+
+func newName(s *Server, tag string) string {
+	for {
+		name := tag + "." + randName()
+		rows := query(s.db, `select name from jobs where name = ?`, name)
+		if countRows(rows) == 0 {
+			return name
+		}
+	}
+}
+
+func newJob(s *Server, j *NewJobDesc) error {
+	name := newName(s, j.Tag)
+
+	// TODO: save domain to file
+	domFile := filepath.Join(s.JobsPath, name)
+	e := WriteDomains(domFile, j.Domains)
+	if e != nil {
+		return e // file saved
+	}
+
+	exec(s.db, `
+		insert into jobs
+		(name, archive, state, total, crawled, tcreate)
+		values
+		(?, ?, ?, ?, ?, ?)`,
+		name, j.Archive, int(Created), len(j.Domains), 0, timeNow(),
+	)
+
+	return nil
 }
 
 func claimJob(s *Server, worker string, j *JobDesc) error {

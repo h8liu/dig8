@@ -2,6 +2,7 @@ package dcrl
 
 import (
 	"bufio"
+	"fmt"
 	"os"
 	"strings"
 
@@ -55,4 +56,22 @@ func ReadDomainStrings(f string) ([]string, error) {
 	}
 
 	return ret, nil
+}
+
+// WriteDomains writes a list of domains into a file
+func WriteDomains(f string, doms []*dns8.Domain) error {
+	fout, e := os.Create(f)
+	if e != nil {
+		return e
+	}
+
+	for _, d := range doms {
+		_, e = fmt.Fprintln(fout, d.String())
+		if e != nil {
+			fout.Close()
+			return e
+		}
+	}
+
+	return fout.Close()
 }
