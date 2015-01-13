@@ -82,14 +82,14 @@ func parseLine(line string) (name, arch string) {
 }
 
 func dequeue() {
-	src := flag.String("src", "ccied50.syenet.ucsd.edu:6379", "source address")
+	src := flag.String("src", "ccied50.sysnet.ucsd.edu:6379", "source address")
 	qname := flag.String("q", "domains", "the queue reading")
 	dest := flag.String("dest", "localhost:5300", "rpc server address")
 	batch := flag.Int("b", 10000, "batching size")
 	tag := flag.String("tag", "feed", "tag name")
 	flag.Parse()
 
-	if validTagName(*tag) {
+	if !validTagName(*tag) {
 		ne(fmt.Errorf("invalid tag name: %q", *tag))
 	} else if *batch <= 0 {
 		ne(fmt.Errorf("invalid batch size: %d", *batch))
