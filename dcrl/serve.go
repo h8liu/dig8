@@ -71,8 +71,12 @@ func serve(s *Server) error {
 				req.c <- claimJob(s, worker, j)
 			case "progress":
 				p := req.data.(*Progress)
-				hit := req.reply.(*bool)
-				req.c <- progress(s, p, hit)
+				okay := req.reply.(*bool)
+				req.c <- progress(s, p, okay)
+			case "newJob":
+				j := req.data.(*NewJobDesc)
+				name := req.reply.(*string)
+				req.c <- newJob(s, j, name)
 			default:
 				log.Printf("error: unknown request %q", req.typ)
 			}
@@ -151,22 +155,20 @@ func newName(s *Server, tag string) string {
 	}
 }
 
-func newJob(s *Server, j *NewJobDesc) error {
-	name := newName(s, j.Tag)
+func newJob(s *Server, j *NewJobDesc, name *string) error {
+	*name = newName(s, j.Tag)
 
 	// TODO: save domain to file
-	domFile := filepath.Join(s.JobsPath, name)
+	domFile := filepath.Join(s.JobsPath, *name)
 	e := WriteDomains(domFile, j.Domains)
-	if e != nil {
-		return e // file saved
-	}
+	ne(e)
 
 	exec(s.db, `
 		insert into jobs
 		(name, archive, state, total, crawled, tcreate)
 		values
 		(?, ?, ?, ?, ?, ?)`,
-		name, j.Archive, int(Created), len(j.Domains), 0, timeNow(),
+		*name, j.Archive, int(Created), len(j.Domains), 0, timeNow(),
 	)
 
 	return nil
@@ -212,7 +214,7 @@ func claimJob(s *Server, worker string, j *JobDesc) error {
 	return nil
 }
 
-func progress(s *Server, p *Progress, hit *bool) error {
+func progress(s *Server, p *Progress, okay *bool) error {
 	tnow := timeNow()
 	if p.Error != "" {
 		exec(s.db, `
@@ -238,6 +240,8 @@ func progress(s *Server, p *Progress, hit *bool) error {
 			int(Crawling), tnow, p.Crawled, p.Name,
 		)
 	}
+
+	*okay = true
 
 	return nil
 }

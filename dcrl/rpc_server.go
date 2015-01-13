@@ -17,12 +17,25 @@ func (s *RPCServer) ClaimJob(worker string, j *JobDesc) error {
 }
 
 // Progress wraps the server's Progress
-func (s *RPCServer) Progress(p *Progress, hit *bool) error {
+func (s *RPCServer) Progress(p *Progress, okay *bool) error {
 	c := make(chan error)
 	(*Server)(s).requests <- &request{
 		typ:   "progress",
 		data:  p,
-		reply: hit,
+		reply: okay,
+		c:     c,
+	}
+
+	return <-c
+}
+
+// NewJob creates a new job with a particular tag
+func (s *RPCServer) NewJob(j *NewJobDesc, name *string) error {
+	c := make(chan error)
+	(*Server)(s).requests <- &request{
+		typ:   "newJob",
+		data:  j,
+		reply: name,
 		c:     c,
 	}
 
