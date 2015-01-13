@@ -6,6 +6,14 @@ import (
 	"runtime"
 )
 
+const helpMsg = `Avaliable commands:
+	server  runs the crawler server
+	worker  runs a crawler worker
+	new     create a new job from a domain list
+	deq		dequeues domains from the domain feed queue
+	crawl   crawls a single job
+`
+
 func main() {
 	runtime.GOMAXPROCS(4)
 
@@ -24,6 +32,8 @@ func main() {
 		newJob()
 	case "crawl":
 		crawl()
+	case "deq":
+		dequeue()
 	case "-h":
 		fmt.Println(helpMsg)
 		os.Exit(0)
@@ -35,10 +45,3 @@ func main() {
 		os.Exit(-1)
 	}
 }
-
-const helpMsg = `Avaliable commands:
-	server  runs the crawler server
-	worker  runs a crawler worker
-	new     create a new job from a domain list
-	crawl   crawls a single job
-`
