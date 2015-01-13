@@ -75,3 +75,20 @@ func WriteDomains(f string, doms []*dns8.Domain) error {
 
 	return fout.Close()
 }
+
+func WriteDomainStrings(f string, doms []string) error {
+	fout, e := os.Create(f)
+	if e != nil {
+		return e
+	}
+
+	for _, d := range doms {
+		_, e = fmt.Fprintln(fout, d)
+		if e != nil {
+			fout.Close()
+			return e
+		}
+	}
+
+	return fout.Close()
+}

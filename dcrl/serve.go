@@ -20,7 +20,7 @@ func InitDB(dbPath string) error {
 		name text not null primary key,
 		archive text not null default "",
 		total int not null default 0,
-		state int not null detault 0,
+		state int not null default 0,
 		worker text not null default "",
 		crawled int not null default 0,
 		retried int not null default 0,
@@ -34,12 +34,7 @@ func InitDB(dbPath string) error {
 		return e
 	}
 
-	e = db.Close()
-	if e != nil {
-		return e
-	}
-
-	return nil
+	return db.Close()
 }
 
 // Serve launches the server
@@ -49,15 +44,18 @@ func Serve(s *Server) error {
 	if e != nil {
 		return e
 	}
-	defer s.db.Close()
 
 	s.requests = make(chan *request, 64)
 
-	return serve(s)
+	go serve(s)
+	return nil
 }
 
 func serve(s *Server) error {
-	ticker := time.Tick(time.Minute)
+	defer s.db.Close()
+
+	// ticker := time.Tick(time.Minute)
+	ticker := time.Tick(time.Second * 2)
 
 	for {
 		select {
@@ -68,15 +66,22 @@ func serve(s *Server) error {
 			case "claimJob":
 				worker := req.data.(string)
 				j := req.reply.(*JobDesc)
-				req.c <- claimJob(s, worker, j)
+				e := claimJob(s, worker, j)
+				log.Printf("[%s] claimed by %s", j.Name, worker)
+				req.c <- e
 			case "progress":
 				p := req.data.(*Progress)
 				okay := req.reply.(*bool)
+				log.Print(p)
 				req.c <- progress(s, p, okay)
 			case "newJob":
 				j := req.data.(*NewJobDesc)
 				name := req.reply.(*string)
-				req.c <- newJob(s, j, name)
+				e := newJob(s, j, name)
+				log.Printf("[%s] created: %d domains",
+					*name, len(j.Domains),
+				)
+				req.c <- e
 			default:
 				log.Printf("error: unknown request %q", req.typ)
 			}
@@ -160,8 +165,7 @@ func newJob(s *Server, j *NewJobDesc, name *string) error {
 
 	// TODO: save domain to file
 	domFile := filepath.Join(s.JobsPath, *name)
-	e := WriteDomains(domFile, j.Domains)
-	ne(e)
+	ne(WriteDomainStrings(domFile, j.Domains))
 
 	exec(s.db, `
 		insert into jobs
@@ -253,8 +257,8 @@ func cleanJobs(s *Server) {
 	// restart the errrored ones
 	exec(s.db, `
 		update jobs set
-		state = ?, tupdate = ?
-		worker = "", crawled = 0, err = "", retried = retried + 1,
+		state = ?, tupdate = ?,
+		worker = "", crawled = 0, err = "", retried = retried + 1
 		where state = ? and tfinish < ? and retried < 3`,
 		int(Created), tnow,
 		int(Errored), tago,

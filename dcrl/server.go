@@ -7,7 +7,6 @@ import (
 // Server is a stateless server where every call is done
 // by a transaction on the underlying sqlite database
 type Server struct {
-	Addr     string
 	JobsDB   string
 	JobsPath string
 

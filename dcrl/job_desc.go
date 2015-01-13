@@ -1,9 +1,5 @@
 package dcrl
 
-import (
-	"lonnie.io/dig8/dns8"
-)
-
 // JobDesc is a job descriptor
 type JobDesc struct {
 	Name    string
@@ -15,5 +11,5 @@ type JobDesc struct {
 type NewJobDesc struct {
 	Tag     string
 	Archive string
-	Domains []*dns8.Domain
+	Domains []string
 }

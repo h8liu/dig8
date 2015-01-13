@@ -20,6 +20,8 @@ func main() {
 		server()
 	case "worker":
 		worker()
+	case "new":
+		newJob()
 	case "crawl":
 		crawl()
 	case "-h":
