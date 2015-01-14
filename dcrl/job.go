@@ -48,7 +48,8 @@ type Job struct {
 
 	Progress func(p *Progress) error // progress report function
 
-	db *sql.DB
+	db     *sql.DB
+	closed chan struct{}
 }
 
 func (j *Job) reportProg(p *Progress) error {
@@ -183,6 +184,10 @@ func (j *Job) launch(c *dns8.Client, finished chan *task) {
 	quotas := makeQuotas()
 
 	for i, d := range j.Domains {
+		if len(j.closed) > 0 {
+			break
+		}
+
 		quota := <-quotas
 		t := &task{
 			domain: d,
@@ -192,7 +197,9 @@ func (j *Job) launch(c *dns8.Client, finished chan *task) {
 
 		go func(t *task, q int) {
 			t.run()
-			finished <- t
+			if len(j.closed) == 0 {
+				finished <- t
+			}
 			quotas <- q
 		}(t, quota)
 	}
@@ -204,12 +211,15 @@ func (j *Job) crawl() error {
 		return e
 	}
 
-	finished := make(chan *task, 10)
+	finished := make(chan *task, nquota)
 
 	ins, err := newTaskInserter(j.db)
 	if err != nil {
 		return err
 	}
+
+	j.closed = make(chan struct{}, 1)
+	defer func() { j.closed <- struct{}{} }()
 
 	go j.launch(c, finished)
 
@@ -221,21 +231,18 @@ func (j *Job) crawl() error {
 			err = j.prog(n)
 			if err != nil {
 				ins.Close()
-				close(finished)
 				return err
 			}
 
 			err = ins.Flush()
 			if err != nil {
 				ins.Close()
-				close(finished)
 				return err
 			}
 		case t := <-finished:
 			err = ins.Insert(t)
 			if err != nil {
 				ins.Close()
-				close(finished)
 				return err
 			}
 			n++
@@ -243,13 +250,7 @@ func (j *Job) crawl() error {
 	}
 
 	ins.Close()
-
-	err = j.prog(n)
-	if err != nil {
-		return err
-	}
-
-	return nil
+	return j.prog(n)
 }
 
 func (j *Job) writeOut() error {
