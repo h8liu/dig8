@@ -27,7 +27,7 @@ func MakeRoots() *ZoneServers {
 	ns("g", "192.112.36.4")   // DISA
 	ns("h", "128.63.2.53")    // U.S. Army Research Lab
 	ns("i", "192.36.148.17")  // Netnod
-	ns("j", "198.58.128.30")  // Verisign
+	ns("j", "192.58.128.30")  // Verisign
 	ns("k", "193.0.14.129")   // RIPE NCC
 	ns("l", "199.7.83.42")    // ICANN
 	ns("m", "202.12.27.33")   // WIDE Project
