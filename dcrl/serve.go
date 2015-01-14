@@ -299,7 +299,7 @@ func cleanJobs(s *Server) {
 		update jobs set
 		state = ?, err = "worker lost"
 		where state = ? and tupdate < ?`,
-		int(Crawling),
-		int(Errored), tago,
+		int(Errored),
+		int(Crawling), tago,
 	)
 }
