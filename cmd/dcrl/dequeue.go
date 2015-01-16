@@ -108,8 +108,8 @@ func dequeue() {
 			if !wasSleeping {
 				log.Print("queue empty, go to sleep now.\n")
 				wasSleeping = true
-				time.Sleep(time.Minute)
 			}
+			time.Sleep(time.Minute * 5)
 			continue
 		} else {
 			wasSleeping = false
