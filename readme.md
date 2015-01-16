@@ -69,10 +69,12 @@ go get lonnie.io/dig8
 - `ips.go`: IP query task
 - `info.go`: All record query task
 
-### Dig8: DNS Crawler scheduler
+### Dcrl: DNS Crawler
 
 - `task.go`: Crawling a single domain
-- `respond.go`: Crawling respond
-- `job.go`: Crawling a list of domains
-- `job_request.go`: Job create request
-- `worker.go`: Crawling worker
+- `task_inserter.go`: Batching insert task results into database
+- `domains.go`: Domain list reading/writing utilities
+- `progress.go`: Progress report
+- `job_state.go`: Job states
+- `job_desc.go`: Job descriptors
+- `server.go`: Crawler scheduling server
