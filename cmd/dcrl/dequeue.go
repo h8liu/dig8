@@ -172,7 +172,7 @@ func dequeue() {
 
 		ne(server.Close())
 
-		_, e = c.Do("ltrim", *qname, 0, -*batch)
+		_, e = c.Do("ltrim", *qname, 0, -len(lines)-1)
 		ne(e)
 		log.Printf("%d domains scheduled with %d jobs", total, len(set))
 	}
