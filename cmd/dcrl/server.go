@@ -31,7 +31,7 @@ func server() {
 		return
 	}
 
-	ne(os.MkdirAll(*jobsPath, 0770))
+	ne(os.MkdirAll(*jobsPath, 0775))
 
 	s := &dcrl.Server{
 		JobsDB:   *dbPath,

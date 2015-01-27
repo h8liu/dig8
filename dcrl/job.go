@@ -94,7 +94,7 @@ func (j *Job) createDB() error {
 	}
 
 	if j.Log != "" {
-		e := os.MkdirAll(j.Log, 0770)
+		e := os.MkdirAll(j.Log, 0775)
 		if e != nil {
 			return e
 		}
@@ -258,7 +258,7 @@ func (j *Job) writeOut() error {
 	var outPath = j.Name
 
 	if j.Archive != "" {
-		e := os.MkdirAll(j.Archive, 0770)
+		e := os.MkdirAll(j.Archive, 0775)
 		if e != nil {
 			return e
 		}
