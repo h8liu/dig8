@@ -18,6 +18,9 @@ type Client struct {
 	recvs      chan *Message
 	timer      <-chan time.Time
 
+	closed  bool
+	closing chan struct{}
+
 	Logger *log.Logger
 }
 
@@ -42,6 +45,7 @@ func NewClientPort(port uint16) (*Client, error) {
 	ret.timer = time.Tick(time.Millisecond * 100)
 	ret.idPool = newIDPool()
 	ret.jobs = make(map[uint16]*job)
+	ret.closing = make(chan struct{})
 
 	go ret.recv()
 	go ret.serve()
@@ -60,12 +64,23 @@ func newRecvBuf() []byte {
 	return make([]byte, packetMaxSize)
 }
 
+// Close the client (asyncly)
+func (c *Client) Close() error {
+	c.closed = true
+	c.closing <- struct{}{}
+	return c.conn.Close()
+}
+
 func (c *Client) recv() {
 	buf := newRecvBuf()
 
 	for {
 		n, addr, e := c.conn.ReadFromUDP(buf)
 		if e != nil {
+			if c.closed {
+				break
+			}
+
 			if c.Logger != nil {
 				c.Logger.Print("recv:", e)
 			}
@@ -103,6 +118,8 @@ func (c *Client) delJob(id uint16) {
 func (c *Client) serve() {
 	for {
 		select {
+		case <-c.closing:
+			return
 		case job := <-c.newJobs:
 			id := job.id
 			bugOn(c.jobs[id] != nil)

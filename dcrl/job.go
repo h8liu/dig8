@@ -210,6 +210,7 @@ func (j *Job) crawl() error {
 	if e != nil {
 		return e
 	}
+	defer c.Close()
 
 	finished := make(chan *task, nquota)
 
