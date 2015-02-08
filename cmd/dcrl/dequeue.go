@@ -143,6 +143,10 @@ func dequeue() {
 				continue
 			}
 
+			if arch == "" {
+				arch = "default"
+			}
+
 			key := name + " " + arch
 			if _, found := dedup[key]; found {
 				continue
@@ -166,7 +170,7 @@ func dequeue() {
 			var jobName string
 			ne(server.Call("Server.NewJob", desc, &jobName))
 			n := len(doms)
-			log.Printf("[%s] new job with %d domains\n", jobName, n)
+			log.Printf("[%s] %d domains in %s\n", jobName, n, arch)
 			total += n
 		}
 
