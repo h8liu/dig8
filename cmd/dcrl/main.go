@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"os"
 	"runtime"
+	"time"
 )
 
 const helpMsg = `Avaliable commands:
@@ -12,6 +13,7 @@ const helpMsg = `Avaliable commands:
 	new     create a new job from a domain list
 	deq		dequeues domains from the domain feed queue
 	crawl   crawls a single job
+	all     runs server, worker and deq all in one process
 `
 
 func main() {
@@ -34,6 +36,17 @@ func main() {
 		crawl()
 	case "deq":
 		dequeue()
+	case "all":
+		server()
+		go func() {
+			time.Sleep(time.Second)
+			worker()
+		}()
+
+		go func() {
+			time.Sleep(time.Second)
+			dequeue()
+		}()
 	case "-h":
 		fmt.Println(helpMsg)
 		os.Exit(0)
