@@ -1,6 +1,7 @@
 package main
 
 import (
+	"flag"
 	"fmt"
 	"os"
 	"runtime"
@@ -27,17 +28,21 @@ func main() {
 
 	switch sub {
 	case "server":
+		flag.Parse()
 		server()
 	case "worker":
+		flag.Parse()
 		worker()
 	case "new":
 		newJob()
 	case "crawl":
 		crawl()
 	case "deq":
+		flag.Parse()
 		dequeue()
 	case "all":
-		server()
+		flag.Parse()
+
 		go func() {
 			time.Sleep(time.Second)
 			worker()
@@ -47,6 +52,8 @@ func main() {
 			time.Sleep(time.Second)
 			dequeue()
 		}()
+
+		server()
 	case "-h":
 		fmt.Println(helpMsg)
 		os.Exit(0)

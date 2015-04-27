@@ -81,22 +81,25 @@ func parseLine(line string) (name, arch string) {
 	return line[:sep], line[sep+1:]
 }
 
-func dequeue() {
-	src := flag.String("src", "ccied50.sysnet.ucsd.edu:6379", "source address")
-	qname := flag.String("q", "domains", "the queue reading")
-	dest := flag.String("dest", "localhost:5300", "rpc server address")
-	batch := flag.Int("b", 10000, "batching size")
-	tag := flag.String("tag", "feed", "tag name")
-	flag.Parse()
+var (
+	src   = flag.String("src", "ccied50.sysnet.ucsd.edu:6379", "source address")
+	qname = flag.String("q", "domains", "the queue reading")
+	dest  = flag.String("dest", "localhost:5300", "rpc server address")
+	batch = flag.Int("b", 10000, "batching size")
+	tag   = flag.String("tag", "feed", "tag name")
+)
 
+func dequeue() {
 	if !validTagName(*tag) {
 		ne(fmt.Errorf("invalid tag name: %q", *tag))
 	} else if *batch <= 0 {
 		ne(fmt.Errorf("invalid batch size: %d", *batch))
 	}
 
+	log.Print("connecting redis server")
 	c, e := redis.Dial("tcp", *src)
 	ne(e)
+	log.Print("redis connected")
 
 	wasSleeping := false
 
@@ -106,14 +109,14 @@ func dequeue() {
 
 		if n == 0 {
 			if !wasSleeping {
-				log.Print("queue empty, go to sleep now.\n")
+				log.Print("queue empty, go to sleep now.")
 				wasSleeping = true
 			}
 			time.Sleep(time.Minute * 5)
 			continue
 		} else {
 			wasSleeping = false
-			log.Printf("%d domains in the queue\n", n)
+			log.Printf("%d domains in the queue", n)
 		}
 
 		lines, e := redis.Strings(c.Do("lrange", *qname, -*batch, -1))

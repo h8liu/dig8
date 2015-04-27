@@ -19,13 +19,14 @@ func ne(e error) {
 	}
 }
 
-func server() {
-	dbPath := flag.String("db", "jobs.db", "database path")
-	doInit := flag.Bool("init", false, "init database")
-	jobsPath := flag.String("jobs", "jobs", "jobs path")
-	addr := flag.String("addr", ":5300", "serving address")
-	flag.Parse()
+var (
+	dbPath   = flag.String("db", "jobs.db", "database path")
+	doInit   = flag.Bool("init", false, "init database")
+	jobsPath = flag.String("jobs", "jobs", "jobs path")
+	addr     = flag.String("addr", ":5300", "serving address")
+)
 
+func server() {
 	if *doInit {
 		ne(dcrl.InitDB(*dbPath))
 		return

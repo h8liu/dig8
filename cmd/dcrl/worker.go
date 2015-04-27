@@ -104,17 +104,17 @@ func workForever(addr string, i int, archive, logPath string) {
 	}
 }
 
+var (
+	nworker  = flag.Int("nworker", 5, "concurrent worker")
+	workaddr = flag.String("workaddr", "localhost:5300", "server address")
+	archPath = flag.String("arch", "archive", "archive path")
+	logPath  = flag.String("log", "log", "log path")
+)
+
 func worker() {
-	nworker := flag.Int("n", 5, "concurrent worker")
-	addr := flag.String("addr", "localhost:5300", "server address")
-	archPath := flag.String("arch", "archive", "archive path")
-	logPath := flag.String("log", "log", "log path")
-
-	flag.Parse()
-
 	for i := 1; i < *nworker; i++ {
-		go workForever(*addr, i, *archPath, *logPath)
+		go workForever(*workaddr, i, *archPath, *logPath)
 	}
 
-	workForever(*addr, *nworker, *archPath, *logPath)
+	workForever(*workaddr, *nworker, *archPath, *logPath)
 }
