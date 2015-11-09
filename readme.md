@@ -5,7 +5,7 @@ A DNS crawling library.
 To install:
 
 ```
-go get github.com/h8liu/dig8
+go get -u github.com/h8liu/dig8
 ```
 
 ## To batch crawl a list of domains
