@@ -7,7 +7,7 @@ import (
 	"os"
 	"path/filepath"
 
-	"lonnie.io/dig8/dcrl"
+	"github.com/h8liu/dig8/dcrl"
 )
 
 func crawl() {

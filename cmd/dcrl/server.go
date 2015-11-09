@@ -9,7 +9,7 @@ import (
 	"net/rpc"
 	"os"
 
-	"lonnie.io/dig8/dcrl"
+	"github.com/h8liu/dig8/dcrl"
 )
 
 func ne(e error) {

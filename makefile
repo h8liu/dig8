@@ -34,5 +34,5 @@ lint:
 	golint ./...
 
 symdep:
-	symdep lonnie.io/dig8/dns8
-	symdep lonnie.io/dig8/dcrl
+	symdep github.com/h8liu/dig8/dns8
+	symdep github.com/h8liu/dig8/dcrl

@@ -5,7 +5,7 @@ A DNS crawling library.
 To install:
 
 ```
-go get lonnie.io/dig8
+go get github.com/h8liu/dig8
 ```
 
 ## Source files (in reading order).

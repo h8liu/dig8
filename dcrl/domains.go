@@ -6,7 +6,7 @@ import (
 	"os"
 	"strings"
 
-	"lonnie.io/dig8/dns8"
+	"github.com/h8liu/dig8/dns8"
 )
 
 // ReadDomains reads a domain list file into a list of domains

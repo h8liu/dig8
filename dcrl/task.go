@@ -3,7 +3,7 @@ package dcrl
 import (
 	"bytes"
 
-	"lonnie.io/dig8/dns8"
+	"github.com/h8liu/dig8/dns8"
 )
 
 // task is a query task arround one single domain

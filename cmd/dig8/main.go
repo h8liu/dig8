@@ -6,7 +6,7 @@ import (
 	"log"
 	"os"
 
-	"lonnie.io/dig8/dns8"
+	"github.com/h8liu/dig8/dns8"
 )
 
 func ne(e error) {

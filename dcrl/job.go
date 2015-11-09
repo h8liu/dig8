@@ -10,7 +10,7 @@ import (
 
 	_ "github.com/mattn/go-sqlite3" // sqlite3
 
-	"lonnie.io/dig8/dns8"
+	"github.com/h8liu/dig8/dns8"
 )
 
 // ValidJobName checks if the job name is valid.

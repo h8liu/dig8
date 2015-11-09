@@ -10,8 +10,8 @@ import (
 	"time"
 
 	"github.com/garyburd/redigo/redis"
-	"lonnie.io/dig8/dcrl"
-	"lonnie.io/dig8/dns8"
+	"github.com/h8liu/dig8/dcrl"
+	"github.com/h8liu/dig8/dns8"
 )
 
 func validArchName(n string) bool {

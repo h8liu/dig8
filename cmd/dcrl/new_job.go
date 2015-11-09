@@ -6,7 +6,7 @@ import (
 	"fmt"
 	"net/rpc"
 
-	"lonnie.io/dig8/dcrl"
+	"github.com/h8liu/dig8/dcrl"
 )
 
 func newJob() {
